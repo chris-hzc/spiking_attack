@@ -46,7 +46,6 @@ spiking_attack/
 │   ├── spiking_layer.py       # SpikingModule with adaptive reuse
 │   └── spiking_model.py       # SpikingModel wrapper and ThresholdScheduler
 ├── models/                     # Model architectures (ResNet, etc.)
-├── quant/                      # Legacy quantization code (for reference)
 ├── spiking_attack.py          # Main attack evaluation script
 ├── spiking_train.py           # Adversarial training with Spiking-PGD
 ├── run_attack.sh              # Example script for running attacks
@@ -323,18 +322,6 @@ This preserves gradient information while saving forward computation!
 - λ=5.0: **Recommended balance**
 - λ=10.0: Fast decay, approaches standard training
 
-## 📝 Citation
-
-If you use this code in your research, please cite the paper:
-
-```bibtex
-@inproceedings{spiking_attack2025,
-  title={Fine-Grained Iterative Adversarial Attacks WITH LIMITED COMPUTATION BUDGET},
-  author={Anonymous},
-  booktitle={Under Review},
-  year={2025}
-}
-```
 
 ## 🤝 Acknowledgments
 
