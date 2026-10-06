@@ -13,16 +13,23 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Union
-import warnings
+
+from spiking.fold_bn import StraightThrough
 
 
-class StraightThrough(nn.Module):
-    """Identity module for pass-through operations"""
-    def __init__(self):
-        super().__init__()
+class _ReuseWithVirtualGrad(torch.autograd.Function):
+    """Forward: return the cached output o_{t-1}. Backward: route A^T(dL/do) to a_t."""
 
-    def forward(self, input):
-        return input
+    @staticmethod
+    def forward(ctx, input, cached_output, layer):
+        ctx.layer = layer
+        ctx.input_shape = input.shape
+        return cached_output.clone()
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        grad_input = ctx.layer.virtual_surrogate_grad(grad_output, ctx.input_shape)
+        return grad_input, None, None
 
 
 class SpikingModule(nn.Module):
@@ -59,15 +66,9 @@ class SpikingModule(nn.Module):
             self.fwd_func = F.linear
             self.layer_type = 'linear'
             
-        # Store weights and biases
+        # Share (not copy) the original parameters so the layer stays trainable
         self.weight = org_module.weight
-        self.org_weight = org_module.weight.data.clone()
-        if org_module.bias is not None:
-            self.bias = org_module.bias
-            self.org_bias = org_module.bias.data.clone()
-        else:
-            self.bias = None
-            self.org_bias = None
+        self.bias = org_module.bias
         
         # Spiking mechanism parameters
         self.rho = rho  # Threshold for relative activation change
@@ -76,7 +77,6 @@ class SpikingModule(nn.Module):
         # Storage for previous activations and outputs
         self.pre_activation = None  # Previous input activation
         self.pre_output = None      # Previous output
-        self.pre_grad = None        # Previous gradient for virtual surrogate
         
         # Activation function
         self.activation_function = StraightThrough()
@@ -107,39 +107,22 @@ class SpikingModule(nn.Module):
         
         relative_change = diff_norm / act_norm
         
-        # Debug output
-        # print(f"Layer {self.layer_type}: relative_change={relative_change:.6f}, threshold={self.rho}")
-        
         return relative_change >= self.rho
 
-    def save_grad_hook(self, grad):
-        """Hook to save gradient from pre_output for virtual surrogate"""
-        self.pre_grad = grad.clone()
-
-    def virtual_surrogate_hook(self, grad):
+    def virtual_surrogate_grad(self, grad_output: torch.Tensor, input_shape) -> torch.Tensor:
         """
-        Virtual surrogate gradient: compute gradient w.r.t. input using chain rule
-        even though we reused the activation in forward pass.
+        Virtual surrogate gradient (Sec. 4.3): dL/da_t = A^T (dL/do_t), applied even
+        though o_t was reused from the previous iteration instead of computed from a_t.
         
         For Conv2d: grad_input = conv_transpose(grad_output, weight)
         For Linear: grad_input = grad_output @ weight
         """
-        if self.pre_grad is None:
-            return  # No saved gradient, use standard backprop
-        
+        weight = self.weight.detach()
         if self.layer_type == 'conv2d':
-            # Compute virtual gradient for conv2d using grad.conv2d_input
-            grad_est = torch.nn.grad.conv2d_input(
-                input_size=grad.shape,
-                weight=self.org_weight,
-                grad_output=self.pre_grad,
-                **self.fwd_kwargs
+            return torch.nn.grad.conv2d_input(
+                input_shape, weight, grad_output, **self.fwd_kwargs
             )
-            grad.copy_(grad_est)
-        elif self.layer_type == 'linear':
-            # Compute virtual gradient for linear layer
-            grad_est = self.pre_grad @ self.org_weight
-            grad.copy_(grad_est)
+        return grad_output @ weight
 
     def forward(self, input: torch.Tensor):
         """
@@ -147,10 +130,10 @@ class SpikingModule(nn.Module):
         
         Decision logic:
         1. If relative change >= rho: perform full computation
-        2. Otherwise: reuse previous output, attach virtual gradient hook
+        2. Otherwise: reuse previous output, backpropagate the virtual surrogate gradient
         """
-        weight = self.org_weight
-        bias = self.org_bias
+        weight = self.weight
+        bias = self.bias
         
         # Spiking mechanism (adaptive reuse)
         if self.use_spiking and self.pre_activation is not None:
@@ -160,21 +143,11 @@ class SpikingModule(nn.Module):
                 # Full computation
                 out = self.fwd_func(input, weight, bias, **self.fwd_kwargs)
                 self.precision_list.append(1)  # Computed
-                print(f"{self.layer_type}: COMPUTE (relative change >= {self.rho})")
             else:
-                # Reuse previous output
-                # Create dependency on input for gradient flow
-                input_clone = input.clone()
-                out = input_clone.reshape(-1)[0] * 0 + self.pre_output
-                
-                # Attach hooks for virtual surrogate gradient
-                if input.requires_grad:
-                    self.pre_output.requires_grad_()
-                    self.pre_output.register_hook(self.save_grad_hook)
-                    input_clone.register_hook(self.virtual_surrogate_hook)
+                # Reuse previous output; backward uses the virtual surrogate gradient
+                out = _ReuseWithVirtualGrad.apply(input, self.pre_output, self)
                 
                 self.precision_list.append(0)  # Reused
-                print(f"{self.layer_type}: REUSE (relative change < {self.rho})")
             
             # Store current activation and output for next iteration
             with torch.no_grad():
@@ -213,7 +186,6 @@ class SpikingModule(nn.Module):
         """Reset stored activations and outputs (call before new attack iteration)"""
         self.pre_activation = None
         self.pre_output = None
-        self.pre_grad = None
 
     def get_precision(self):
         """
@@ -271,4 +243,6 @@ def reset_precision_tracking_all_layers(model):
     for module in model.modules():
         if isinstance(module, SpikingModule):
             module.reset_precision_tracking()
+
+
 

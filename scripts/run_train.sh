@@ -1,4 +1,5 @@
 #!/bin/bash
+cd "$(dirname "$0")/.." || exit 1
 # Example script for adversarial training with Spiking-PGD
 
 # Experiment 1: Constant threshold schedule
@@ -91,4 +92,6 @@ python spiking_train.py \
     --exp_name standard_pgd_at_baseline
 
 echo "All training experiments completed!"
+
+
 

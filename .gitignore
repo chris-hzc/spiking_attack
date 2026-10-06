@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Data, checkpoints, logs
+data/
+checkpoint*/
+log/
+log_train/
+*.pth
+*.pt
+
+# Paper PDF (link to arXiv instead)
+*.pdf
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

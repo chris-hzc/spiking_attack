@@ -135,7 +135,7 @@ net = net.to(device)
 cudnn.benchmark = True
 
 # Create spiking model for adversarial training
-spiking_model = SpikingModel(model=net, rho=args.rho_initial)
+spiking_model = SpikingModel(model=net, rho=args.rho_initial, fold_bn=False)
 spiking_model.to(device)
 
 # Threshold scheduler
@@ -438,4 +438,6 @@ if __name__ == '__main__':
     print(f'Best Clean Accuracy: {best_clean_acc:.2f}%')
     print(f'Best Robust Accuracy: {best_robust_acc:.2f}%')
     print('='*60)
+
+
 

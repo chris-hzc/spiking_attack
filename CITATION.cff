@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite our paper."
+title: "Fine-Grained Iterative Adversarial Attacks with Limited Computation Budget"
+authors:
+  - family-names: Hou
+    given-names: Zhichao
+    affiliation: North Carolina State University
+  - family-names: Gao
+    given-names: Weizhi
+    affiliation: North Carolina State University
+  - family-names: Liu
+    given-names: Xiaorui
+    affiliation: North Carolina State University
+type: software
+repository-code: "https://github.com/chris-hzc/spiking_attack"
+license: MIT
+preferred-citation:
+  type: conference-paper
+  title: "Fine-Grained Iterative Adversarial Attacks with Limited Computation Budget"
+  authors:
+    - family-names: Hou
+      given-names: Zhichao
+    - family-names: Gao
+      given-names: Weizhi
+    - family-names: Liu
+      given-names: Xiaorui
+  collection-title: "International Conference on Learning Representations"
+  conference:
+    name: "International Conference on Learning Representations (ICLR)"
+  volume: 2026
+  start: 75235
+  end: 75250
+  year: 2026
+  url: "https://arxiv.org/abs/2510.26981"

@@ -1,4 +1,5 @@
 #!/bin/bash
+cd "$(dirname "$0")/.." || exit 1
 # Example script for running Spiking-PGD attack evaluation
 
 # Experiment 1: Standard attack with different rho values
@@ -101,4 +102,6 @@ python spiking_attack.py \
     --epoch_eval 150
 
 echo "All experiments completed!"
+
+
 

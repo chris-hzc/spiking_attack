@@ -8,7 +8,7 @@ adaptive activation reuse based on the paper methodology.
 import torch
 import torch.nn as nn
 from spiking.spiking_layer import SpikingModule, StraightThrough
-from quant.fold_bn import search_fold_and_remove_bn
+from spiking.fold_bn import search_fold_and_remove_bn
 
 
 class SpikingModel(nn.Module):
@@ -17,19 +17,21 @@ class SpikingModel(nn.Module):
     
     Key features:
     - Replaces Conv2d and Linear layers with SpikingModule
-    - Maintains ReLU activation functions within SpikingModule
     - Supports threshold scheduling (constant or exponential decay)
     
     Args:
         model: Base nn.Module to wrap
         rho: Initial threshold for relative change (default: 0.02)
+        fold_bn: Fold BatchNorm into the preceding layer (use for attacking a
+            trained model; disable for adversarial training from scratch)
     """
     
-    def __init__(self, model: nn.Module, rho: float = 0.02):
+    def __init__(self, model: nn.Module, rho: float = 0.02, fold_bn: bool = True):
         super().__init__()
         
         # Fold batch normalization into conv layers for cleaner computation
-        search_fold_and_remove_bn(model)
+        if fold_bn:
+            search_fold_and_remove_bn(model)
         
         self.model = model
         self.rho = rho
@@ -45,20 +47,13 @@ class SpikingModel(nn.Module):
             module: nn.Module to refactor
             rho: Threshold for relative activation change
         """
-        prev_spiking_module = None
-        
+        # Activations (ReLU etc.) are left in place: folding them into the
+        # preceding layer would apply e.g. ResNet's post-residual ReLU before
+        # the skip connection and change the network's function.
         for name, child_module in module.named_children():
             if isinstance(child_module, (nn.Conv2d, nn.Linear)):
                 # Replace with SpikingModule
-                spiking_layer = SpikingModule(child_module, rho=rho)
-                setattr(module, name, spiking_layer)
-                prev_spiking_module = spiking_layer
-                
-            elif isinstance(child_module, (nn.ReLU, nn.ReLU6)):
-                # Move activation function into previous SpikingModule
-                if prev_spiking_module is not None:
-                    prev_spiking_module.activation_function = child_module
-                    setattr(module, name, StraightThrough())
+                setattr(module, name, SpikingModule(child_module, rho=rho))
                     
             elif isinstance(child_module, StraightThrough):
                 continue
@@ -196,4 +191,6 @@ class ThresholdScheduler:
             return f"ThresholdScheduler(constant, rho={self.rho_0})"
         else:
             return f"ThresholdScheduler(exponential, rho_0={self.rho_0}, lambda={self.lambda_decay})"
+
+
 

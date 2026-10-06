@@ -62,6 +62,10 @@ parser.add_argument('--step_size', default=2, type=int,
                     help='step size for each attack iteration (in range [0, 255])')
 
 # Experiment settings
+parser.add_argument('--checkpoint', default=None, type=str,
+                    help='path to a checkpoint (overrides --file_name/--epoch_eval lookup)')
+parser.add_argument('--data_dir', default='./data', type=str,
+                    help='dataset root directory')
 parser.add_argument('--batch_size', default=100, type=int,
                     help='batch size for evaluation')
 parser.add_argument('--num_workers', default=4, type=int,
@@ -81,15 +85,17 @@ transform_test = transforms.Compose([
 # Load dataset
 if args.dataset == 'cifar10':
     test_dataset = torchvision.datasets.CIFAR10(
-        root='./data', train=False, download=True, transform=transform_test
+        root=args.data_dir, train=False, download=True, transform=transform_test
     )
 elif args.dataset == 'cifar100':
     test_dataset = torchvision.datasets.CIFAR100(
-        root='./data', train=False, download=True, transform=transform_test
+        root=args.data_dir, train=False, download=True, transform=transform_test
     )
 elif args.dataset == 'imagenet':
-    _, test_dataset = get_tinyimagenet_loader(
-        train_batch_size=128, test_batch_size=args.batch_size
+    # Tiny-ImageNet: expects <data_dir>/tiny-imagenet-200/val arranged in
+    # one sub-folder per class (see README: Data Preparation)
+    test_dataset = torchvision.datasets.ImageFolder(
+        os.path.join(args.data_dir, 'tiny-imagenet-200', 'val'), transform=transform_test
     )
 
 test_loader = torch.utils.data.DataLoader(
@@ -133,7 +139,10 @@ elif args.dataset == 'imagenet':
         f'{args.file_name}_{args.epoch_eval}'
     )
 
-checkpoint = torch.load(checkpoint_path)
+if args.checkpoint is not None:
+    checkpoint_path = args.checkpoint
+
+checkpoint = torch.load(checkpoint_path, map_location=device)
 net.load_state_dict(checkpoint['net'])
 
 # Create backbone (clean model for transfer attack evaluation)
@@ -200,15 +209,11 @@ class SpikingPGDAttack:
         
         # Iterative attack
         for i in range(self.k):
-            print(f"\n========== Iteration {i+1}/{self.k} ==========")
-            
             x.requires_grad_()
             
             with torch.enable_grad():
                 logits = self.model(x)
                 loss = F.cross_entropy(logits, y)
-            
-            print(f"Loss: {loss.item():.4f}")
             
             # Compute gradient
             loss.backward()
@@ -355,6 +360,9 @@ if __name__ == '__main__':
     
     # Close log file
     sys.stdout.close()
+    sys.stdout = sys.__stdout__
     
     print(f'\nResults saved to: {log_file}')
+
+
 
