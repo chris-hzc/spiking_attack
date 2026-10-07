@@ -145,6 +145,40 @@ input[type=range] { width: 100%; accent-color: var(--fire); }
 .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 7px; }
 .note { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
 
+
+/* ---------- Race (redundancy animation) ---------- */
+.race-card { margin-top: 34px; border-radius: 20px; background: var(--hero); color: var(--hero-ink); overflow: hidden; box-shadow: var(--shadow); }
+.race-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px 24px; padding: 20px clamp(16px, 3vw, 28px) 0; }
+.race-iter { font: 500 13px/1 var(--mono); letter-spacing: .08em; color: var(--hero-muted); }
+.race-iter b { color: var(--hero-ink); font: 500 26px/1 var(--display); letter-spacing: 0; margin-right: 6px; }
+.race-iter .ph { color: #ff9466; margin-left: 8px; }
+.race-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+.rbtn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 9px; border: 1px solid rgba(242,244,248,.18); background: rgba(255,255,255,.06); color: var(--hero-ink); font: 500 14px/1 var(--body); cursor: pointer; }
+.rbtn:hover { background: rgba(255,255,255,.12); }
+.rbtn svg { width: 14px; height: 14px; fill: currentColor; }
+.rrho { display: flex; align-items: center; gap: 10px; font: 500 12.5px/1 var(--mono); color: var(--hero-muted); }
+.rrho input { width: 150px; accent-color: #f07a4a; }
+.rrho output { color: var(--hero-ink); min-width: 4ch; }
+.seg { display: inline-flex; padding: 3px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(242,244,248,.14); }
+.seg button { border: 0; background: transparent; color: var(--hero-muted); font: 500 13px/1 var(--body); padding: 8px 11px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: #f2f4f8; color: #0e1420; }
+.race-note b { color: var(--ink); font-weight: 600; }
+.stage-wrap { overflow-x: auto; }
+#stage { display: block; width: 100%; aspect-ratio: 1000 / 560; }
+.meters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 28px; padding: 4px clamp(16px, 3vw, 28px) 24px; }
+@media (max-width: 720px) { .meters { grid-template-columns: minmax(0, 1fr); } }
+.meter { display: grid; gap: 8px; min-width: 0; }
+.mh { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font: 600 14px/1.2 var(--body); }
+.mh b { font: 500 24px/1 var(--display); font-variant-numeric: tabular-nums; }
+.mh b small { font: 500 12px var(--mono); color: var(--hero-muted); margin-left: 4px; }
+.mbar { height: 10px; border-radius: 99px; background: rgba(255,255,255,.07); display: flex; overflow: hidden; }
+.mbar i { display: block; height: 100%; width: 0; transition: width .18s linear; }
+.mbar .use { background: #f07a4a; } .mbar .waste { background: #6b778c; background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgba(255,255,255,.18) 4px 7px); }
+.msub { font-size: 13px; color: var(--hero-muted); }
+.msub b { color: var(--hero-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.meter.ours .mh span { color: #ff9466; }
+.race-note { font-size: 13.5px; color: var(--muted); margin-top: 14px; text-align: center; }
+
 /* ---------- Method ---------- */
 .steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 64px; margin-top: 40px; }
 .step { min-width: 0; }
@@ -246,6 +280,45 @@ footer { margin-top: 88px; padding-block: 36px 48px; border-top: 1px solid var(-
   <p class="kicker">Abstract</p>
   <div class="prose">
     <p>This work tackles a critical challenge in AI safety research under limited compute: given a fixed computation budget, how can one maximize the strength of iterative adversarial attacks? Coarsely reducing the number of attack iterations lowers cost but substantially weakens effectiveness. To fulfill the attainable attack efficacy within a constrained budget, we propose a fine-grained control mechanism that selectively recomputes layer activations across both iteration-wise and layer-wise levels. Extensive experiments show that our method consistently outperforms existing baselines at equal cost. Moreover, when integrated into adversarial training, it attains comparable performance with only 30% of the original budget.</p>
+  </div>
+</section>
+
+<section id="replay">
+  <div class="col">
+    <p class="kicker">Animation</p>
+    <h2>One decision per layer, per iteration</h2>
+    <div class="prose"><p>Each PGD step runs the input forward through all 18 layers. Spiking-PGD checks every layer as the forward pass reaches it: if its input changed by at least \(\rho\) since the last step, the layer is recomputed; otherwise the whole layer reuses its cached output \(\hat o_{t-1}\). The decision is made afresh at every iteration, so a layer that was reused can be recomputed at full precision later if its input starts moving again. Watch the iteration × layer mask fill in.</p></div>
+  </div>
+  <div class="wide">
+    <div class="race-card" id="race">
+      <div class="race-head">
+        <div class="race-iter" aria-live="polite"><b id="rcT">T1</b>of 10 PGD iterations<span class="ph" id="rcPh"></span></div>
+        <div class="race-ctrl">
+          <div class="seg" role="group" aria-label="Data">
+            <button type="button" data-ds="illustrative" aria-pressed="true">Illustrative</button>
+            <button type="button" data-ds="measured" aria-pressed="false">Measured (Fig. 1)</button>
+          </div>
+          <label class="rrho" for="rcRho">ρ ×10⁻² <input id="rcRho" type="range" min="0.2" max="4.2" step="0.1" value="1.0"><output id="rcRhoOut" for="rcRho">1.0</output></label>
+          <button class="rbtn" id="rcPlay" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="rcIcon" d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg><span>Pause</span></button>
+          <button class="rbtn" id="rcRestart" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>Restart</button>
+        </div>
+      </div>
+      <div class="stage-wrap"><canvas id="stage" role="img" aria-label="Animated Spiking-PGD attack: per-layer decisions to recompute or reuse, filling an iteration by layer mask"></canvas></div>
+      <div class="meters">
+        <div class="meter">
+          <div class="mh"><span>Vanilla PGD</span><b id="mV">0<small>/ 180</small></b></div>
+          <div class="mbar"><i class="use" id="mVu"></i><i class="waste" id="mVw"></i></div>
+          <div class="msub">recomputes every layer; <b id="mVwN">0</b> of these were layers whose input barely changed</div>
+        </div>
+        <div class="meter ours">
+          <div class="mh"><span>Spiking-PGD</span><b id="mS">0<small>/ 180</small></b></div>
+          <div class="mbar"><i class="use" id="mSu"></i></div>
+          <div class="msub"><b id="mSs">0</b> layers reused instead · <b id="mSp">–</b> of vanilla's compute</div>
+        </div>
+      </div>
+    </div>
+    <p class="race-note" id="rcNote"><b>Illustrative scenario:</b> based on the measured Fig. 1 values, with a few layers whose change rises again at later iterations, so they are reused first and then recomputed at full precision (marked ↻). Switch to <i>Measured</i> for the paper's ResNet-18 data, where changes decay steadily. The first iteration is always computed in full.</p>
+    <p class="race-note" id="rcNoteM" hidden><b>Measured:</b> per-layer relative change from Fig. 1 of the paper (normal ResNet-18, CIFAR-10). The first iteration is always computed in full.</p>
   </div>
 </section>
 
@@ -401,6 +474,209 @@ const D = [
   [0.59,0.74,0.63,0.71,0.62,0.51,0.44,0.54,0.38,0.40,0.31,0.31,0.19,0.42,0.34,0.35,0.26,0.24]
 ];
 const T = D.length, L = D[0].length, TOTAL = T * L;
+
+
+// ---- Animation: per-layer compute/reuse decisions filling the T x L mask ----
+(() => {
+  const cv = document.getElementById('stage'), ctx = cv.getContext('2d');
+  const $ = id => document.getElementById(id);
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const VW = 1000, VH = 560, X0 = 112, CW = 38, GAP = 6, XIN = 58, XOUT = X0 + L * (CW + GAP) + 46;
+  const BY = 62, BH = 92;                       // network row: layer blocks
+  const GY = 236, RH = 28, RG = 4;              // mask grid
+  const cx = l => X0 + l * (CW + GAP);
+  const ry = t => GY + t * (RH + RG);
+  const FIRE = [240, 122, 74], REUSE = [124, 189, 143], GRAD = [130, 178, 255], INK = '#f2f4f8', MUT = '#9aa6ba';
+  const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const VMAX = 4.1;
+  let rho = 1.0, FS = 1, narrow = false;
+  // Illustrative scenario: the measured Fig. 1 values, with a few layers whose change rises again
+  // after dropping below rho (they are reused first, then recomputed later).
+  const DI = D.map(r => r.slice());
+  const bump = { 0: { 4: 0.95, 5: 1.12, 8: 1.35 }, 8: { 8: 1.42 }, 12: { 7: 1.25 }, 6: { 9: 1.18 }, 10: { 8: 1.12 }, 15: { 9: 1.30 }, 3: { 5: 1.38, 6: 0.92, 9: 1.21 } };
+  for (const l in bump) for (const t in bump[l]) DI[t][l] = bump[l][t];
+  let A = DI;
+
+  const TF = 1500, TB = 520, TP = 420, ITER = TF + TB + TP, HOLD = 3000;
+  let t0 = performance.now(), paused = false, pauseAt = 0, raf = 0, visible = false;
+  const comp = (t, l) => t === 0 || A[t][l] >= rho;
+  const refire = (t, l) => t > 1 && comp(t, l) && !comp(t - 1, l);
+
+  function size() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(w * VH / VW * dpr);
+    ctx.setTransform(cv.width / VW, 0, 0, cv.height / VH, 0, 0);
+    narrow = w < 620; FS = narrow ? Math.min(2.2, 620 / w) : 1;
+  }
+  const font = (w, px, fam) => `${w} ${px * FS}px ${fam}`;
+  const SANS = '"IBM Plex Sans", system-ui, sans-serif', MONO = '"IBM Plex Mono", monospace', SERIF = '"Newsreader", Georgia, serif';
+  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+  const ease = x => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+
+  function meters(iter, passed) {
+    let v = 0, sp = 0, w = 0;
+    for (let k = 0; k <= iter; k++) for (let l = 0; l < L; l++) {
+      if (k === iter && l >= passed) break;
+      v++; if (comp(k, l)) sp++; else w++;
+    }
+    $('mV').firstChild.nodeValue = v; $('mS').firstChild.nodeValue = sp;
+    $('mVu').style.width = (100 * (v - w) / (T * L)) + '%'; $('mVw').style.width = (100 * w / (T * L)) + '%';
+    $('mSu').style.width = (100 * sp / (T * L)) + '%';
+    $('mVwN').textContent = w; $('mSs').textContent = v - sp; $('mSp').textContent = v ? Math.round(100 * sp / v) + '%' : '–';
+  }
+
+  function downArrow(x, y0, y1, a) {
+    ctx.strokeStyle = rgba(REUSE, a); ctx.fillStyle = rgba(REUSE, a); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1 - 5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 4.5, y1 - 7); ctx.lineTo(x + 4.5, y1 - 7); ctx.lineTo(x, y1); ctx.closePath(); ctx.fill();
+  }
+
+  function draw(now) {
+    const el = now - t0, cycle = T * ITER + HOLD, e = ((el % cycle) + cycle) % cycle;
+    const holding = e >= T * ITER, iter = holding ? T - 1 : Math.floor(e / ITER), local = holding ? ITER : e - iter * ITER;
+    const wf = Math.min(L + 1, (local / TF) * (L + 1));                   // 0 = input, 1..L = layers, L+1 = loss
+    const wb = local < TF || local > TF + TB ? -1 : (L + 1) * (1 - (local - TF) / TB);
+    const passed = Math.max(0, Math.min(L, Math.floor(wf)));
+    const reachedAt = l => iter * ITER + (l + 1) / (L + 1) * TF;          // time (in cycle) layer l is reached
+    const since = l => e - reachedAt(l);
+
+    meters(iter, passed);
+    $('rcT').textContent = 'T' + (iter + 1);
+    $('rcPh').textContent = holding ? '· done' : local < TF ? '· forward →' : local < TF + TB ? '· ← backward' : '· update x';
+
+    ctx.clearRect(0, 0, VW, VH);
+
+    // ---------- network row ----------
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = MUT; ctx.font = font('500', 11.5, MONO);
+    ctx.fillText(`ITERATION T${iter + 1}`, 24, 28);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    // input and loss
+    for (const [x, sym] of [[XIN, 'x'], [XOUT, 'ℒ']]) {
+      ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.beginPath(); ctx.arc(x, BY + BH / 2, 19, 0, 7); ctx.fill();
+      ctx.fillStyle = INK; ctx.font = font('italic 500', 21, SERIF); ctx.fillText(sym, x - (sym === 'x' ? 3 : 0), BY + BH / 2);
+      if (sym === 'x') { ctx.font = font('italic 500', 12, SERIF); ctx.fillText('t', x + 6, BY + BH / 2 + 7); }
+    }
+    // links
+    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.moveTo(XIN + 19, BY + BH / 2); ctx.lineTo(cx(0), BY + BH / 2);
+    for (let l = 0; l < L - 1; l++) { ctx.moveTo(cx(l) + CW, BY + BH / 2); ctx.lineTo(cx(l + 1), BY + BH / 2); }
+    ctx.moveTo(cx(L - 1) + CW, BY + BH / 2); ctx.lineTo(XOUT - 19, BY + BH / 2); ctx.stroke();
+
+    for (let l = 0; l < L; l++) {
+      const x = cx(l), reached = holding || l < passed, s_ = since(l);
+      const tShow = reached ? iter : Math.max(0, iter - 1);
+      const vPrev = iter > 0 ? A[iter - 1][l] : 0, vNow = A[iter][l];
+      const k = reached ? ease(s_ / 260) : 0;
+      const v = reached ? vPrev + (vNow - vPrev) * k : (iter > 0 ? vPrev : 0);
+      const c = comp(tShow, l), col = c ? FIRE : REUSE;
+      const fresh = reached && !holding ? Math.exp(-Math.max(0, s_) / 450) : 0;
+      // block
+      if (fresh > .02) { ctx.shadowColor = rgba(col, .9); ctx.shadowBlur = 26 * fresh; }
+      rr(x, BY, CW, BH, 7); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fill(); ctx.shadowBlur = 0;
+      ctx.lineWidth = 1.5 + 1.5 * fresh; ctx.strokeStyle = reached ? rgba(col, .55 + .45 * fresh) : 'rgba(255,255,255,.12)'; ctx.stroke();
+      // gauge
+      const gh = (BH - 8) * Math.min(1, v / VMAX);
+      ctx.save(); rr(x + 4, BY + 4, CW - 8, BH - 8, 4); ctx.clip();
+      ctx.fillStyle = rgba(reached ? col : [150, 162, 182], reached ? .75 : .25);
+      ctx.fillRect(x + 4, BY + BH - 4 - gh, CW - 8, gh); ctx.restore();
+      // rho line
+      const yr = BY + BH - 4 - (BH - 8) * Math.min(1, rho / VMAX);
+      ctx.strokeStyle = 'rgba(255,148,102,.9)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(x + 1, yr); ctx.lineTo(x + CW - 1, yr); ctx.stroke(); ctx.setLineDash([]);
+      // scanning highlight
+      if (!holding && local < TF && Math.abs(wf - (l + 1)) < .6) { rr(x - 3, BY - 3, CW + 6, BH + 6, 9); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.5; ctx.stroke(); }
+      // stamp
+      // stamps: "reuse" stays on the block; "compute" travels with the forward pass so labels never collide
+      const latest = (!holding && l === passed - 1) || (refire(iter, l) && (holding || s_ < 1400));
+      if (reached && iter > 0 && !narrow && (!c || latest)) {
+        ctx.font = font('600', 10.5, MONO); ctx.fillStyle = rgba(col, holding ? .75 : .45 + .55 * fresh);
+        ctx.fillText(c ? (refire(iter, l) ? '↻ full' : 'compute') : 'reuse', x + CW / 2, BY - 13 - 6 * fresh);
+      }
+      if (narrow ? (l === 0 || l === L - 1) : true) { ctx.fillStyle = '#6f7a8e'; ctx.font = font('500', 10.5, MONO); ctx.fillText('L' + (l + 1), x + CW / 2, BY + BH + 14); }
+    }
+    // rho legend on the left
+    ctx.textAlign = 'right'; ctx.fillStyle = '#ff9466'; ctx.font = font('500', 11, MONO);
+    ctx.fillText('ρ', cx(0) - 8, BY + BH - 4 - (BH - 8) * Math.min(1, rho / VMAX));
+    ctx.textAlign = 'center';
+
+    // forward particles along the row
+    if (!holding && local < TF) {
+      ctx.globalCompositeOperation = 'lighter';
+      const xw = wf <= 0 ? XIN : wf >= L + 1 ? XOUT : wf < 1 ? XIN + (cx(0) - XIN) * wf : cx(Math.min(L - 1, Math.floor(wf) - 1)) + CW / 2 + (CW + GAP) * (wf - Math.floor(wf));
+      for (let k = 0; k < 6; k++) { ctx.fillStyle = `rgba(255,214,190,${.9 - k * .14})`; ctx.beginPath(); ctx.arc(xw - k * 7, BY + BH / 2, 4 - k * .5, 0, 7); ctx.fill(); }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    // backward gradient band
+    if (wb >= 0) {
+      const xg = XIN + (XOUT - XIN) * wb / (L + 1);
+      const g = ctx.createLinearGradient(xg - 46, 0, xg + 46, 0);
+      g.addColorStop(0, rgba(GRAD, 0)); g.addColorStop(.5, rgba(GRAD, .38)); g.addColorStop(1, rgba(GRAD, 0));
+      ctx.fillStyle = g; ctx.fillRect(xg - 46, BY - 8, 92, BH + 16);
+    }
+
+    // ---------- mask grid ----------
+    ctx.textAlign = 'left'; ctx.fillStyle = MUT; ctx.font = font('500', 11.5, MONO);
+    ctx.fillText('ITERATION × LAYER MASK', 24, GY - 22);
+    ctx.textAlign = 'center';
+    for (let t = 0; t < T; t++) {
+      const y = ry(t), rowDone = t < iter || holding, rowNow = t === iter && !holding;
+      ctx.fillStyle = rowNow ? INK : '#6f7a8e'; ctx.font = font('500', 11, MONO); ctx.textAlign = 'right';
+      ctx.fillText('T' + (t + 1), cx(0) - 10, y + RH / 2);
+      let n = 0;
+      for (let l = 0; l < L; l++) {
+        const x = cx(l), filled = rowDone || (rowNow && l < passed), c = comp(t, l);
+        rr(x, y, CW, RH, 4);
+        if (!filled) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill(); continue; }
+        n += c;
+        const fresh = rowNow ? Math.exp(-Math.max(0, since(l)) / 400) : 0;
+        ctx.fillStyle = c ? rgba(FIRE, .85) : rgba(REUSE, .22); ctx.fill();
+        if (!c) { ctx.strokeStyle = rgba(REUSE, .55); ctx.lineWidth = 1; ctx.stroke(); }
+        if (!c && t > 0) {                                   // reuse: copy from the row above
+          const drop = rowNow ? ease(since(l) / 380) : 1;
+          downArrow(x + CW / 2, y - RG - 2, y - 2 + (RH - 4) * drop * .7, rowNow ? .5 + .5 * fresh : .7);
+        }
+        if (c && refire(t, l)) {                             // reused before, recomputed now
+          rr(x - 1.5, y - 1.5, CW + 3, RH + 3, 5); ctx.strokeStyle = '#ffe2d3'; ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = '#ffffff'; ctx.font = font('700', 11, SANS); ctx.textAlign = 'center'; ctx.fillText('↻', x + CW / 2, y + RH / 2 + 1);
+        }
+        if (fresh > .05) { ctx.shadowColor = rgba(c ? FIRE : REUSE, .9); ctx.shadowBlur = 16 * fresh; rr(x, y, CW, RH, 4); ctx.strokeStyle = rgba(c ? FIRE : REUSE, fresh); ctx.lineWidth = 2; ctx.stroke(); ctx.shadowBlur = 0; }
+      }
+      if (rowDone || (rowNow && passed === L)) {
+        ctx.textAlign = 'left'; ctx.font = font('500', 11, MONO); ctx.fillStyle = n === L ? '#ff9466' : n === 0 ? 'rgb(124,189,143)' : MUT;
+        ctx.fillText(`${n}/${L}`, cx(L - 1) + CW + 12, y + RH / 2);
+      }
+    }
+    ctx.textAlign = 'center';
+  }
+
+  function loop(now) { if (!paused) draw(now); raf = visible && !paused ? requestAnimationFrame(loop) : 0; }
+  function start() { if (!raf && !paused) raf = requestAnimationFrame(loop); }
+  function setPaused(p) {
+    paused = p;
+    $('rcPlay').querySelector('span').textContent = p ? 'Play' : 'Pause';
+    $('rcIcon').setAttribute('d', p ? 'M7 4l13 8-13 8z' : 'M6 4h4v16H6zM14 4h4v16h-4z');
+    if (p) { pauseAt = performance.now(); cancelAnimationFrame(raf); raf = 0; }
+    else { t0 += performance.now() - pauseAt; start(); }
+  }
+  $('rcPlay').addEventListener('click', () => setPaused(!paused));
+  $('rcRestart').addEventListener('click', () => { t0 = performance.now(); pauseAt = t0; if (paused) setPaused(false); else start(); });
+  document.querySelectorAll('[data-ds]').forEach(btn => btn.addEventListener('click', () => {
+    A = btn.dataset.ds === 'measured' ? D : DI;
+    document.querySelectorAll('[data-ds]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    $('rcNote').hidden = A !== DI; $('rcNoteM').hidden = A === DI;
+    if (paused || still) draw(pauseAt || performance.now());
+  }));
+  $('rcRho').addEventListener('input', ev => { rho = parseFloat(ev.target.value); $('rcRhoOut').textContent = rho.toFixed(1); if (paused || still) draw(pauseAt || performance.now()); });
+
+  size();
+  // complete at rest: the finished attack, then animate while on screen
+  t0 = performance.now() - T * ITER - 50; pauseAt = performance.now(); draw(pauseAt);
+  if (still) { paused = true; $('rcPlay').querySelector('span').textContent = 'Play'; $('rcIcon').setAttribute('d', 'M7 4l13 8-13 8z'); return; }
+  t0 = performance.now();
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: .2 }).observe(cv);
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { size(); draw(paused ? pauseAt : performance.now()); }, 120); });
+})();
 
 // ---- Explorer ----
 function build(el) {
