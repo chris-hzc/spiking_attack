@@ -6,7 +6,10 @@
 
 North Carolina State University
 
+<a href="https://chris-hzc.github.io/spiking_attack/"><img src="assets/project_page_button.svg" alt="Project Page: interactive demo" width="440"/></a>
+
 [![ICLR 2026](https://img.shields.io/badge/ICLR-2026-4b44ce.svg)](https://iclr.cc/Conferences/2026)
+[![Project Page](https://img.shields.io/badge/Project-Page-f07a4a.svg?logo=googlechrome&logoColor=white)](https://chris-hzc.github.io/spiking_attack/)
 [![arXiv](https://img.shields.io/badge/arXiv-2510.26981-b31b1b.svg?logo=arxiv)](https://arxiv.org/abs/2510.26981)
 [![PDF](https://img.shields.io/badge/Paper-PDF-blue.svg?logo=adobeacrobatreader)](https://arxiv.org/pdf/2510.26981)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
@@ -21,14 +24,28 @@ North Carolina State University
 
 ---
 
+> [!TIP]
+> **🌐 Explore the interactive project page → [chris-hzc.github.io/spiking_attack](https://chris-hzc.github.io/spiking_attack/)**
+>
+> Watch Spiking-PGD decide layer by layer what to recompute, drag a compute budget across the results on five benchmarks, and replay 200 epochs of adversarial training.
+
 ## 🔥 TL;DR
 
 > Given a **fixed computation budget**, how can we make an iterative adversarial attack as strong as possible?
 >
 > Instead of cutting iterations, **Spiking-PGD** recomputes a layer only when its input has changed enough (a *spike*), reuses the cached output otherwise, and keeps gradients alive through a **virtual surrogate gradient**. At equal cost it consistently beats early-stopped PGD, I-FGSM and MI-FGSM, and it makes **adversarial training up to 70% cheaper** without degrading clean or robust accuracy.
 
+## 🌐 Interactive Project Page
+
+<p align="center">
+  <a href="https://chris-hzc.github.io/spiking_attack/"><img src="assets/project_page.jpg" width="88%" alt="Animated demo from the project page: per-layer compute/reuse decisions filling an iteration-by-layer mask"/></a>
+  <br/>
+  <sub><b><a href="https://chris-hzc.github.io/spiking_attack/">Open the project page</a></b> · animated attack walkthrough · budget explorer on CIFAR-10/100, Tiny-ImageNet, Cora, Citeseer · adversarial-training replay</sub>
+</p>
+
 ## 📰 News
 
+- **[2026-10]** 🌐 [Interactive project page](https://chris-hzc.github.io/spiking_attack/) is live.
 - **[2026]** 🎉 Accepted to **ICLR 2026**!
 - **[2025-10]** Paper released on [arXiv](https://arxiv.org/abs/2510.26981). Code is public.
 
