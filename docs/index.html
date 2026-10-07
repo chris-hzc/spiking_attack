@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spiking Iterative Attack</title>
+<meta name="description" content="ICLR 2026. Fine-Grained Iterative Adversarial Attacks with Limited Computation Budget. Zhichao Hou, Weizhi Gao, Xiaorui Liu (NC State).">
+<meta property="og:title" content="Fine-Grained Iterative Adversarial Attacks with Limited Computation Budget">
+<meta property="og:description" content="Spiking-PGD recomputes a layer only when its input changes enough, giving stronger attacks and cheaper adversarial training under a fixed compute budget. ICLR 2026.">
+<meta property="og:image" content="static/images/teaser.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>
+  window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] }, svg: { fontCache: 'global' } };
+</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<style>
+/* Layout: one 1040px reading column, left-aligned like a paper; figures sit on white "plates"
+   so they read in both themes. Fire (recompute) = orange, reuse = sage, taken from the paper's Fig. 2. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #17202e;
+  --muted: #586274;
+  --line: #dde1e8;
+  --fire: #e0612f;
+  --fire-soft: #fbe3d6;
+  --reuse: #6aa77d;
+  --reuse-soft: #dcefe1;
+  --link: #1f5fbf;
+  --code-bg: #eef1f5;
+  --plate: #ffffff;
+  --display: "Instrument Serif", "Times New Roman", Georgia, serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161f; --surface: #182030; --ink: #e6e9ef; --muted: #9aa4b5; --line: #2a3446;
+    --fire: #f07a4a; --fire-soft: #4a2a1e; --reuse: #7fbf92; --reuse-soft: #1f3a2a;
+    --link: #7fb0ff; --code-bg: #1c2536; --plate: #f4f5f7; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161f; --surface: #182030; --ink: #e6e9ef; --muted: #9aa4b5; --line: #2a3446;
+  --fire: #f07a4a; --fire-soft: #4a2a1e; --reuse: #7fbf92; --reuse-soft: #1f3a2a;
+  --link: #7fb0ff; --code-bg: #1c2536; --plate: #f4f5f7; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 17px/1.65 var(--body);
+}
+a { color: var(--link); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--fire); outline-offset: 2px; }
+img { max-width: 100%; height: auto; display: block; }
+
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; }
+section { padding-block: 56px; border-top: 1px solid var(--line); }
+.eyebrow {
+  font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 14px;
+}
+h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
+h2 { font-size: clamp(30px, 4vw, 40px); line-height: 1.1; margin-bottom: 18px; }
+h3 { font-size: 25px; line-height: 1.2; margin-bottom: 8px; }
+p { margin: 0; max-width: 68ch; }
+.stack { display: grid; gap: 16px; }
+
+/* ---------- Hero ---------- */
+header { padding-block: 64px 40px; }
+.venue {
+  display: inline-flex; align-items: center; gap: 10px;
+  font: 500 13px/1 var(--mono); letter-spacing: .08em; color: var(--fire);
+  margin-bottom: 22px;
+}
+.venue::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--fire); box-shadow: 0 0 0 4px var(--fire-soft); }
+h1 { font-size: clamp(38px, 6.2vw, 68px); line-height: 1.02; letter-spacing: -.01em; max-width: 17ch; }
+h1 em { font-style: italic; color: var(--fire); }
+.authors { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 18px; }
+.authors a { color: var(--ink); text-decoration-color: var(--line); }
+.affil { color: var(--muted); margin-top: 6px; font-size: 15px; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font: 500 14px/1 var(--body); text-decoration: none; transition: border-color .15s, transform .15s;
+}
+.btn:hover { border-color: var(--ink); transform: translateY(-1px); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+.plate { background: var(--plate); border-radius: 10px; padding: 18px; border: 1px solid var(--line); }
+figure { margin: 0; }
+figcaption { color: var(--muted); font-size: 14.5px; margin-top: 12px; max-width: 80ch; }
+figcaption b { color: var(--ink); font-weight: 600; }
+.teaser { margin-top: 44px; }
+
+/* ---------- TL;DR + numbers ---------- */
+.tldr { font-family: var(--display); font-size: clamp(23px, 2.8vw, 29px); line-height: 1.35; max-width: 34em; }
+.tldr .f { color: var(--fire); } .tldr .r { color: var(--reuse); }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 36px; border-top: 1px solid var(--line); }
+.fact { padding: 18px 20px 0 0; }
+.fact + .fact { padding-left: 20px; border-left: 1px solid var(--line); }
+.fact .n { font: 400 44px/1 var(--display); font-variant-numeric: tabular-nums; }
+.fact .l { color: var(--muted); font-size: 14px; margin-top: 8px; }
+@media (max-width: 640px) {
+  .facts { grid-template-columns: 1fr; }
+  .fact + .fact { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
+  .fact { padding: 16px 0; }
+}
+.abstract { margin-top: 36px; color: var(--muted); }
+.abstract summary { cursor: pointer; font: 500 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.abstract p { margin-top: 14px; }
+
+/* ---------- Explorer ---------- */
+.explorer { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; margin-top: 28px; display: grid; gap: 22px; }
+.controls { display: flex; flex-wrap: wrap; align-items: end; gap: 18px 36px; }
+.slider { flex: 1 1 280px; min-width: 0; }
+.slider label { display: flex; justify-content: space-between; font: 500 13px/1 var(--mono); color: var(--muted); margin-bottom: 10px; }
+.slider label output { color: var(--ink); font-size: 15px; }
+input[type=range] { width: 100%; accent-color: var(--fire); }
+.readout { display: flex; gap: 28px; font-variant-numeric: tabular-nums; }
+.readout div { display: grid; gap: 4px; }
+.readout .k { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.readout .v { font: 400 34px/1 var(--display); }
+.readout .v.fire { color: var(--fire); }
+.grids { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+@media (max-width: 820px) { .grids { grid-template-columns: 1fr; } }
+.gridbox { min-width: 0; }
+.gridbox h4 { margin: 0 0 10px; font: 600 14px/1.3 var(--body); }
+.gridbox h4 span { font-weight: 400; color: var(--muted); }
+.scroll { overflow-x: auto; }
+.mask { display: grid; grid-template-columns: 26px repeat(18, minmax(14px, 1fr)); gap: 3px; min-width: 330px; font: 500 10px/1 var(--mono); }
+.mask .rl, .mask .cl { color: var(--muted); display: flex; align-items: center; }
+.mask .cl { justify-content: center; padding-top: 4px; }
+.cell { aspect-ratio: 1; border-radius: 3px; background: var(--reuse-soft); border: 1px solid transparent; transition: background .2s, border-color .2s; }
+.cell.on { background: var(--fire); }
+.cell.first { background: var(--fire); opacity: .55; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.note { font-size: 13.5px; color: var(--muted); max-width: 90ch; }
+
+/* ---------- Method ---------- */
+.steps { display: grid; gap: 44px; margin-top: 12px; }
+.step { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 32px; align-items: start; }
+@media (max-width: 820px) { .step { grid-template-columns: 1fr; } }
+.step .tag { font: 500 12px/1 var(--mono); color: var(--fire); letter-spacing: .08em; margin-bottom: 10px; }
+.step p + p { margin-top: 12px; }
+.math { overflow-x: auto; margin-top: 14px; font-size: 15px; }
+
+/* ---------- Results ---------- */
+.results { display: grid; gap: 40px; margin-top: 12px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+@media (max-width: 820px) { .pair { grid-template-columns: 1fr; } }
+
+/* ---------- BibTeX ---------- */
+.bib { position: relative; background: var(--code-bg); border-radius: 10px; border: 1px solid var(--line); }
+.bib pre { margin: 0; padding: 20px; overflow-x: auto; font: 400 13.5px/1.6 var(--mono); }
+.copy { position: absolute; top: 10px; right: 10px; font: 500 12px/1 var(--mono); padding: 7px 11px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+
+footer { padding-block: 40px 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="venue">ICLR 2026</div>
+  <h1>Fine-Grained Iterative Adversarial Attacks with <em>Limited Computation Budget</em></h1>
+  <div class="authors">
+    <a href="mailto:zhou4@ncsu.edu">Zhichao Hou</a>
+    <a href="mailto:wgao23@ncsu.edu">Weizhi Gao</a>
+    <a href="mailto:xliu96@ncsu.edu">Xiaorui Liu</a>
+  </div>
+  <div class="affil">North Carolina State University</div>
+  <nav class="links" aria-label="Paper links">
+    <a class="btn primary" href="https://arxiv.org/pdf/2510.26981"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 3.5V8h4.5z"/></svg>Paper</a>
+    <a class="btn" href="https://arxiv.org/abs/2510.26981"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"/></svg>arXiv</a>
+    <a class="btn" href="https://github.com/chris-hzc/spiking_attack"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>Code</a>
+    <a class="btn" href="#bibtex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>BibTeX</a>
+  </nav>
+
+  <figure class="teaser">
+    <div class="plate"><img src="static/images/teaser.png" alt="Three attack execution patterns: vanilla iterative attack computes every layer at every iteration; coarse-grained attack stops early at step S; fine-grained attack selectively recomputes or reuses each layer at each iteration." width="1800" height="777"></div>
+    <figcaption><b>Three ways to spend an attack budget.</b> (a) A vanilla iterative attack computes every layer at every step. (b) A coarse-grained attack stops early at step <i>S</i>. (c) Our fine-grained attack chooses, per layer and per iteration, whether to recompute (orange) or reuse (green).</figcaption>
+  </figure>
+</header>
+
+<section class="wrap" id="tldr">
+  <p class="eyebrow">In one paragraph</p>
+  <p class="tldr">Given a fixed compute budget, cutting PGD iterations weakens the attack. <b>Spiking-PGD</b> instead <span class="f">recomputes</span> a layer only when its input has changed enough, <span class="r">reuses</span> the cached output otherwise, and keeps the attack gradient alive with a virtual surrogate gradient.</p>
+
+  <div class="facts">
+    <div class="fact"><div class="n">30%</div><div class="l">of the PGD-AT budget for comparable clean and robust accuracy in adversarial training</div></div>
+    <div class="fact"><div class="n">5</div><div class="l">benchmarks: CIFAR-10, CIFAR-100, Tiny-ImageNet, Cora, Citeseer</div></div>
+    <div class="fact"><div class="n">1</div><div class="l">knob, the spiking threshold ρ, trades cost against attack strength</div></div>
+  </div>
+
+  <details class="abstract">
+    <summary>Abstract</summary>
+    <p>This work tackles a critical challenge in AI safety research under limited compute: given a fixed computation budget, how can one maximize the strength of iterative adversarial attacks? Coarsely reducing the number of attack iterations lowers cost but substantially weakens effectiveness. To fulfill the attainable attack efficacy within a constrained budget, we propose a fine-grained control mechanism that selectively recomputes layer activations across both iteration-wise and layer-wise levels. Extensive experiments show that our method consistently outperforms existing baselines at equal cost. Moreover, when integrated into adversarial training, it attains comparable performance with only 30% of the original budget.</p>
+  </details>
+</section>
+
+<section class="wrap" id="explorer">
+  <p class="eyebrow">Try it</p>
+  <h2>Where does the budget go?</h2>
+  <p>Each cell is one layer of ResNet-18 at one PGD iteration on CIFAR-10. Values are the measured relative activation change \(\|a_t-a_{t-1}\|/\|a_t\|\) from Fig. 1 of the paper. Move the threshold to see which layers fire under the spiking gate, and how early stopping would spend the same number of layer computations.</p>
+
+  <div class="explorer">
+    <div class="controls">
+      <div class="slider">
+        <label for="rho"><span>Spiking threshold ρ (×10⁻²)</span><output id="rhoOut" for="rho">1.50</output></label>
+        <input id="rho" type="range" min="0.2" max="4.2" step="0.05" value="1.5">
+      </div>
+      <div class="readout" aria-live="polite">
+        <div><span class="k">Layers computed</span><span class="v fire" id="cost">–</span></div>
+        <div><span class="k">Early stop at</span><span class="v" id="es">–</span></div>
+      </div>
+    </div>
+    <div class="grids">
+      <div class="gridbox">
+        <h4>Spiking-PGD <span>· fires where change ≥ ρ</span></h4>
+        <div class="scroll"><div class="mask" id="maskS" role="img" aria-label="Spiking mask"></div></div>
+      </div>
+      <div class="gridbox">
+        <h4>Early stopping <span>· same number of layer computations</span></h4>
+        <div class="scroll"><div class="mask" id="maskE" role="img" aria-label="Early stopping mask"></div></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--fire)"></i>recompute</span>
+      <span><i style="background:var(--reuse-soft)"></i>reuse / skip</span>
+      <span><i style="background:var(--fire);opacity:.55"></i>first iteration, always computed</span>
+    </div>
+    <p class="note">Spiking-PGD spreads computation across all ten iterations and spends it where activations still move, mostly the deep layers L14 to L18 in early steps. Early stopping spends the same amount on the first few iterations only. This is an illustration on measured statistics; in a real attack the activation changes also depend on which layers were reused.</p>
+  </div>
+</section>
+
+<section class="wrap" id="method">
+  <p class="eyebrow">Method</p>
+  <h2>Spiking Iterative Attack</h2>
+  <div class="steps">
+    <div class="step">
+      <div>
+        <div class="tag">OBSERVATION</div>
+        <h3>Iterative attacks are redundant</h3>
+        <p>Across PGD iterations, hidden activations quickly stop changing, and they settle at different rates in different layers. Adversarially trained models change even less. Recomputing every layer at every step wastes most of the budget.</p>
+      </div>
+      <figure><div class="plate"><img src="static/images/redundancy.png" alt="Relative activation change across attack iterations and layers for ResNet-18 on CIFAR-10." loading="lazy" width="1800" height="639"></div></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <div class="tag">FORMULATION</div>
+        <h3>Budget allocation as a layer-wise mask</h3>
+        <p>Let \(\Delta\in\{0,1\}^{T\times L}\) mark whether layer \(l\) is recomputed at iteration \(t\). Early stopping is the block-structured special case, so its optimum can never beat the fine-grained one: \(V_{\text{coarse}}\le V_{\text{fine}}\).</p>
+      </div>
+      <div class="math">\[\max_{\Delta\in\{0,1\}^{T\times L}}\ \mathcal{L}\big(\mathbf{x}_{T+1}(\Delta),y\big)\quad\text{s.t.}\quad\sum_{t=1}^{T}\sum_{l=1}^{L}C_{t,l}\,\delta_{t,l}\le C_{\text{total}}\]</div>
+    </div>
+
+    <div class="step">
+      <div>
+        <div class="tag">FORWARD</div>
+        <h3>Spiking forward computation</h3>
+        <p>For a linear layer, the new output is the old output plus the layer applied to the activation residual. A gate with one threshold \(\rho\) fires only when that residual is large, and otherwise reuses \(\hat o_{t-1}\). This searches the exponential mask space with a single cheap rule.</p>
+        <div class="math">\[\mathcal{S}_\rho(a_t,a_{t-1})=\begin{cases}a_t-a_{t-1}, & \frac{\|a_t-a_{t-1}\|}{\|a_t\|}\ge\rho\\[2pt] \mathbf{0}, & \text{otherwise}\end{cases}\]</div>
+      </div>
+      <figure><div class="plate"><img src="static/images/spiking_forward.png" alt="Vanilla forward computation written as residual accumulation, and spiking forward computation with the spiking function applied to the residual." loading="lazy" width="1400" height="313"></div></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <div class="tag">BACKWARD</div>
+        <h3>Virtual surrogate gradient</h3>
+        <p>Reusing a cached output cuts the autograd graph, and the gradient to the input vanishes. We route the upstream gradient back through the layer's adjoint, \(\partial\mathcal L/\partial a_t=\mathcal A^{\top}(\partial\mathcal L/\partial\hat o)\), using <code>conv2d_input</code> for convolutions and a matrix product for linear layers.</p>
+      </div>
+      <figure><div class="plate"><img src="static/images/virtual_gradient.png" alt="Exact gradient, vanishing gradient under reuse, and the virtual surrogate gradient." loading="lazy" width="1400" height="298"></div></figure>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="results">
+  <p class="eyebrow">Results</p>
+  <h2>Stronger at every budget</h2>
+  <div class="results">
+    <figure>
+      <div class="plate"><img src="static/images/results_vision.png" alt="Accuracy under attack versus computation cost on CIFAR-10, CIFAR-100 and Tiny-ImageNet for I-FGSM, MI-FGSM, PGD and Spiking-PGD." loading="lazy" width="1800" height="496"></div>
+      <figcaption><b>Vision, ResNet-18.</b> Accuracy under attack against relative computation cost (lower is a stronger attack). Spiking-PGD is strongest at every budget, and the gap is largest when compute is scarce.</figcaption>
+    </figure>
+    <div class="pair">
+      <figure>
+        <div class="plate"><img src="static/images/results_graph.png" alt="Accuracy under PGD and Spiking-PGD topology attacks versus computation cost on Cora and Citeseer." loading="lazy" width="1400" height="579"></div>
+        <figcaption><b>Graphs, GCN.</b> Topology attacks on Cora and Citeseer show the same pattern: PGD weakens quickly as compute drops, while Spiking-PGD holds its strength.</figcaption>
+      </figure>
+      <figure>
+        <div class="plate"><img src="static/images/ablation.png" alt="Ablations on spiking threshold, virtual gradient and attack radius." loading="lazy" width="1800" height="495"></div>
+        <figcaption><b>Ablations.</b> Raising ρ cuts cost much faster than it weakens the attack. The virtual gradient matters most at low cost. Smaller radii ε degrade more gracefully.</figcaption>
+      </figure>
+    </div>
+    <figure>
+      <div class="plate"><img src="static/images/adv_training.png" alt="Clean and robust accuracy curves and precision curves for PGD-AT and Spiking-PGD adversarial training with different decay rates." loading="lazy" width="1800" height="640"></div>
+      <figcaption><b>Adversarial training, CIFAR-10.</b> The threshold decays as \(\rho(t)=\rho_0\frac{e^{-\lambda t/N}-e^{-\lambda}}{1-e^{-\lambda}}\), so early epochs use cheap, weaker perturbations. With \(\lambda=2\), Spiking-PGD nearly matches PGD-AT in best clean and robust accuracy using under 30% of the computation.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="wrap" id="bibtex">
+  <p class="eyebrow">Citation</p>
+  <h2>BibTeX</h2>
+  <div class="bib">
+    <button class="copy" id="copyBib" type="button">Copy</button>
+<pre id="bibText">@inproceedings{hou2026fine,
+  title={Fine-Grained Iterative Adversarial Attacks with Limited Computation Budget},
+  author={Hou, Zhichao and Gao, Weizhi and Liu, Xiaorui},
+  booktitle={International Conference on Learning Representations},
+  volume={2026},
+  pages={75235--75250},
+  year={2026}
+}</pre>
+  </div>
+</section>
+
+<footer class="wrap">
+  Questions: Zhichao Hou, zhou4@ncsu.edu · Code on <a href="https://github.com/chris-hzc/spiking_attack">GitHub</a> (MIT license)
+</footer>
+
+<script>
+// Relative activation change (x1e-2), ResNet-18 / CIFAR-10, normal model. Rows T1..T10, columns L1..L18 (paper Fig. 1).
+const D = [
+  [1.44,2.67,2.57,3.19,2.92,2.81,2.55,3.05,2.30,2.87,2.62,3.04,2.11,3.79,3.55,4.09,3.37,3.39],
+  [1.31,2.35,2.25,2.81,2.56,2.41,2.18,2.61,1.99,2.49,2.26,2.75,1.91,3.38,3.20,3.75,3.15,3.13],
+  [1.22,2.13,2.04,2.52,2.27,2.05,1.84,2.22,1.67,2.08,1.90,2.31,1.70,2.94,2.78,3.21,2.67,2.63],
+  [1.12,1.89,1.78,2.13,1.91,1.75,1.58,1.89,1.43,1.76,1.62,1.99,1.42,2.54,2.41,2.84,2.25,2.19],
+  [1.01,1.64,1.52,1.83,1.61,1.45,1.31,1.60,1.19,1.51,1.34,1.70,1.22,2.12,1.98,2.29,1.83,1.74],
+  [0.90,1.32,1.18,1.47,1.32,1.18,1.06,1.29,0.95,1.17,1.00,1.30,0.98,1.62,1.49,1.70,1.41,1.33],
+  [0.79,1.16,1.04,1.33,1.18,1.03,0.90,1.10,0.79,0.93,0.77,1.00,0.75,1.24,1.12,1.28,1.11,1.04],
+  [0.69,0.90,0.79,0.96,0.85,0.69,0.58,0.71,0.49,0.55,0.44,0.48,0.29,0.59,0.50,0.56,0.46,0.41],
+  [0.62,0.82,0.70,0.80,0.71,0.57,0.48,0.59,0.41,0.45,0.36,0.40,0.24,0.50,0.41,0.40,0.30,0.29],
+  [0.59,0.74,0.63,0.71,0.62,0.51,0.44,0.54,0.38,0.40,0.31,0.31,0.19,0.42,0.34,0.35,0.26,0.24]
+];
+const T = D.length, L = D[0].length, TOTAL = T * L;
+
+function build(el) {
+  const cells = [];
+  for (let t = 0; t < T; t++) {
+    const rl = document.createElement('div'); rl.className = 'rl'; rl.textContent = 'T' + (t + 1); el.appendChild(rl);
+    cells.push([]);
+    for (let l = 0; l < L; l++) {
+      const c = document.createElement('div'); c.className = 'cell';
+      c.title = `T${t + 1}, L${l + 1}: ${D[t][l].toFixed(2)}×10⁻²`;
+      el.appendChild(c); cells[t].push(c);
+    }
+  }
+  el.appendChild(document.createElement('div'));
+  for (let l = 0; l < L; l++) {
+    const cl = document.createElement('div'); cl.className = 'cl'; cl.textContent = (l % 3 === 0 || l === L - 1) ? 'L' + (l + 1) : ''; el.appendChild(cl);
+  }
+  return cells;
+}
+const S = build(document.getElementById('maskS'));
+const E = build(document.getElementById('maskE'));
+const rho = document.getElementById('rho');
+
+function render() {
+  const r = parseFloat(rho.value);
+  document.getElementById('rhoOut').textContent = r.toFixed(2);
+  let n = 0;
+  for (let t = 0; t < T; t++) for (let l = 0; l < L; l++) {
+    const first = t === 0, on = !first && D[t][l] >= r;
+    S[t][l].className = 'cell' + (first ? ' first' : on ? ' on' : '');
+    if (first || on) n++;
+  }
+  // Early stopping with the same number of layer computations: fill whole iterations in order.
+  for (let k = 0; k < TOTAL; k++) {
+    const t = Math.floor(k / L), l = k % L;
+    E[t][l].className = 'cell' + (k < n ? (t === 0 ? ' first' : ' on') : '');
+  }
+  document.getElementById('cost').textContent = Math.round(100 * n / TOTAL) + '%';
+  document.getElementById('es').textContent = 'T' + Math.max(1, Math.ceil(n / L));
+}
+rho.addEventListener('input', render);
+render();
+
+document.getElementById('copyBib').addEventListener('click', async (e) => {
+  const btn = e.currentTarget, text = document.getElementById('bibText').textContent;
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+  catch { const s = window.getSelection(), r = document.createRange(); r.selectNodeContents(document.getElementById('bibText')); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected'; }
+  setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
+});
+</script>
+</body>
+</html>
