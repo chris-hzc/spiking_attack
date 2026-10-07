@@ -17,7 +17,7 @@
 </script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
 <style>
-/* Layout: dark "compute grid" hero band (iterations x layers firing live), teaser figure below it,
+/* Layout: dark "compute grid" hero band (iterations x layers firing live),
    then a 760px reading column with figures breaking out to 1100px. Fire = orange, reuse = sage (paper Fig. 2). */
 :root {
   --bg: #f7f8fa;
@@ -31,6 +31,7 @@
   --reuse-soft: #dfeee3;
   --link: #1d5bb8;
   --code-bg: #121927;
+  --c-pgd: #3d6fd1; --c-mi: #8a63c9; --c-i: #8b95a6;
   --code-ink: #dfe5ee;
   --hero: #0e1420;
   --hero-ink: #f2f4f8;
@@ -45,14 +46,14 @@
   :root:not([data-theme="light"]) {
     --bg: #0f141d; --surface: #171e2b; --ink: #e7eaf0; --muted: #9ba5b7; --line: #263042;
     --fire: #f07a4a; --fire-soft: #43271c; --reuse: #7cbd8f; --reuse-soft: #1d3426;
-    --link: #82b2ff; --code-bg: #0a0e15; --code-ink: #dfe5ee; --hero: #0a0f18;
+    --link: #82b2ff; --code-bg: #0a0e15; --c-pgd: #7ea6ff; --c-mi: #b498f0; --c-i: #8d97a8; --code-ink: #dfe5ee; --hero: #0a0f18;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 40px -12px rgba(0,0,0,.6); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f141d; --surface: #171e2b; --ink: #e7eaf0; --muted: #9ba5b7; --line: #263042;
   --fire: #f07a4a; --fire-soft: #43271c; --reuse: #7cbd8f; --reuse-soft: #1d3426;
-  --link: #82b2ff; --code-bg: #0a0e15; --code-ink: #dfe5ee; --hero: #0a0f18;
+  --link: #82b2ff; --code-bg: #0a0e15; --c-pgd: #7ea6ff; --c-mi: #b498f0; --c-i: #8d97a8; --code-ink: #dfe5ee; --hero: #0a0f18;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 40px -12px rgba(0,0,0,.6); color-scheme: dark;
 }
 
@@ -90,7 +91,6 @@ p { margin: 0; }
 .btn.primary:hover { background: #fff; }
 .btn svg { width: 16px; height: 16px; fill: currentColor; }
 
-.teaser { margin-top: 56px; }
 .card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--line); }
 /* Figures are transparent PNGs that sit straight on the page; in dark mode their lightness is
    inverted while hues are kept, so black text turns light and nothing shows as a white block. */
@@ -116,35 +116,6 @@ h2 { font-size: clamp(30px, 4vw, 42px); line-height: 1.12; text-align: center; m
 .fact .n small { font-size: .5em; color: var(--muted); margin-left: 2px; }
 .fact .l { color: var(--muted); font-size: 14px; line-height: 1.5; margin-top: 10px; }
 @media (max-width: 640px) { .facts { grid-template-columns: 1fr; } }
-
-/* ---------- Explorer ---------- */
-.explorer { padding: clamp(18px, 3vw, 32px); display: grid; gap: 26px; margin-top: 34px; }
-.controls { display: flex; flex-wrap: wrap; align-items: end; gap: 18px 40px; }
-.slider { flex: 1 1 300px; min-width: 0; }
-.slider label { display: flex; justify-content: space-between; font: 500 13px/1 var(--mono); color: var(--muted); margin-bottom: 12px; }
-.slider label output { color: var(--ink); font-size: 15px; }
-input[type=range] { width: 100%; accent-color: var(--fire); }
-.readout { display: flex; gap: 32px; font-variant-numeric: tabular-nums; }
-.readout div { display: grid; gap: 6px; }
-.readout .k { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.readout .v { font: 500 36px/1 var(--display); }
-.readout .v.fire { color: var(--fire); }
-.grids { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
-@media (max-width: 860px) { .grids { grid-template-columns: 1fr; } }
-.gridbox { min-width: 0; }
-.gridbox h4 { margin: 0 0 12px; font: 600 14.5px/1.3 var(--body); }
-.gridbox h4 span { font-weight: 400; color: var(--muted); }
-.scroll { overflow-x: auto; }
-.mask { display: grid; grid-template-columns: 28px repeat(18, minmax(14px, 1fr)); gap: 3px; min-width: 330px; font: 500 10px/1 var(--mono); }
-.mask .rl, .mask .cl { color: var(--muted); display: flex; align-items: center; }
-.mask .cl { justify-content: center; padding-top: 5px; }
-.cell { aspect-ratio: 1; border-radius: 3px; background: var(--reuse-soft); transition: background .25s, transform .25s; }
-.cell.on { background: var(--fire); }
-.cell.first { background: var(--fire); opacity: .5; }
-.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13.5px; color: var(--muted); }
-.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 7px; }
-.note { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
-
 
 /* ---------- Race (redundancy animation) ---------- */
 .race-card { margin-top: 34px; border-radius: 20px; background: var(--hero); color: var(--hero-ink); overflow: hidden; box-shadow: var(--shadow); }
@@ -212,12 +183,75 @@ mjx-container .fire { fill: var(--fire); stroke: var(--fire); }
 .gradeq { font-size: 14px; overflow-x: auto; overflow-y: hidden; }
 .gradnote { font-size: 13.5px; color: var(--muted); text-align: center; }
 
-/* ---------- Results tabs ---------- */
-.tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin: 30px auto 22px; padding: 5px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; width: fit-content; max-width: 100%; }
-.tab { border: 0; background: transparent; color: var(--muted); font: 500 14.5px/1 var(--body); padding: 10px 16px; border-radius: 8px; cursor: pointer; }
-.tab:hover { color: var(--ink); }
-.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); }
-.panel.narrow .fig { max-width: 860px; margin-inline: auto; }
+/* ---------- Results: budget explorer ---------- */
+.rs { margin-top: 30px; padding: clamp(16px, 3vw, 28px); display: grid; gap: 22px; }
+.rs-top { display: flex; flex-wrap: wrap; gap: 14px 28px; }
+.dsg { display: grid; gap: 8px; }
+.dsg-l { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.seg2 { display: inline-flex; flex-wrap: wrap; padding: 3px; gap: 2px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); }
+.seg2 button { border: 0; background: transparent; color: var(--muted); font: 500 13.5px/1 var(--body); padding: 9px 12px; border-radius: 7px; cursor: pointer; }
+.seg2 button:hover { color: var(--ink); }
+.seg2 button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.rs-body { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 860px) { .rs-body { grid-template-columns: minmax(0, 1fr); } }
+.rs-chart { min-width: 0; }
+#rsSvg { width: 100%; height: auto; display: block; touch-action: pan-y; cursor: ew-resize; user-select: none; }
+#rsSvg .ax { stroke: var(--line); } #rsSvg .tk { fill: var(--muted); font: 500 11px var(--mono); }
+#rsSvg .al { fill: var(--muted); font: 500 12px var(--body); }
+#rsSvg .ln { fill: none; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.3,.7,.2,1); }
+#rsSvg .ln.ours { stroke-width: 3.6; }
+#rsSvg .gap { fill: var(--fire); fill-opacity: .12; transition: opacity .6s; }
+#rsSvg .cur { stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 3 4; }
+#rsSvg .curl { fill: var(--ink); font: 600 12px var(--mono); }
+#rsSvg .dot { stroke: var(--surface); stroke-width: 2.5; }
+#rsSvg .lab { font: 600 12px var(--body); }
+.rs-leg { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.rs-leg i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: 4px; margin-right: 7px; }
+.rs-leg .ours { color: var(--fire); font-weight: 600; } .rs-leg .ours i { height: 4px; }
+.rs-leg i.gapk { height: 10px; vertical-align: -1px; background: var(--fire); opacity: .2; }
+.rs-range { display: flex; align-items: center; gap: 12px; margin-top: 6px; font: 500 12px var(--mono); color: var(--muted); }
+.rs-range input { flex: 1; accent-color: var(--fire); }
+.rs-side { display: grid; gap: 16px; min-width: 0; }
+.rs-at { font: 500 15px/1.3 var(--body); color: var(--muted); }
+.rs-at b { color: var(--ink); font: 500 22px var(--display); }
+.rs-hl { display: grid; gap: 4px; padding: 16px 18px; border-radius: 14px; background: color-mix(in srgb, var(--fire) 9%, transparent); }
+.rs-hl span { font: 500 46px/1 var(--display); color: var(--fire); font-variant-numeric: tabular-nums; }
+.rs-hl small { font-size: 13.5px; color: var(--muted); }
+.rs-rows { display: grid; gap: 10px; }
+.rs-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) 54px; align-items: center; gap: 10px; font-size: 13.5px; }
+.rs-row .nm { font-weight: 600; }
+.rs-row .tr { height: 12px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 6%, transparent); overflow: hidden; }
+.rs-row .tr { display: block; } .rs-row .br { display: block; height: 100%; border-radius: 99px; transition: width .25s ease; }
+.rs-row .vl { text-align: right; font: 500 13px var(--mono); font-variant-numeric: tabular-nums; }
+.rs-row.ours .nm, .rs-row.ours .vl { color: var(--fire); }
+.rs-foot { font-size: 12.5px; color: var(--muted); }
+
+/* ---------- Results: adversarial training animation ---------- */
+.at-intro { margin-top: 64px; }
+.at-intro h3 { font-size: clamp(24px, 3vw, 30px); text-align: center; margin-bottom: 14px; }
+.race-card.at { margin-top: 28px; }
+.at-body { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: 22px; padding: 14px clamp(16px, 3vw, 28px) 8px; }
+@media (max-width: 860px) { .at-body { grid-template-columns: minmax(0, 1fr); } }
+.at-charts { display: grid; gap: 4px; min-width: 0; }
+.at-charts svg { width: 100%; height: auto; display: block; }
+.at-charts .ax { stroke: rgba(255,255,255,.08); } .at-charts .tk { fill: #7d889b; font: 500 11px var(--mono); }
+.at-charts .al { fill: #9aa6ba; font: 500 12px var(--body); }
+.at-side { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.at-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.at-stat { display: grid; gap: 5px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 9px; }
+.at-stat .k { font: 500 10.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--hero-muted); }
+.at-stat .v { font: 500 26px/1 var(--display); font-variant-numeric: tabular-nums; }
+.at-stat .v.fire { color: #ff9466; }
+.at-stat.big { border-top: 0; padding: 14px 16px; border-radius: 14px; background: rgba(240,122,74,.12); }
+.at-stat.big .v { font-size: 52px; color: #ff9466; }
+.at-stat .s { font-size: 13px; color: var(--hero-muted); }
+.at-mask-l { font: 500 10.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--hero-muted); }
+.at-mask-l small { text-transform: none; letter-spacing: 0; }
+.at-mask { display: grid; grid-template-columns: repeat(18, minmax(0, 1fr)); gap: 2px; }
+.at-mask i { aspect-ratio: 1; border-radius: 2px; background: rgba(124,189,143,.22); transition: background .25s; }
+.at-mask i.on { background: #f07a4a; }
+.at-msg { min-height: 48px; padding: 6px clamp(16px, 3vw, 28px) 20px; font-size: 14.5px; color: var(--hero-muted); }
+.at-msg b { color: var(--hero-ink); }
 
 /* ---------- BibTeX ---------- */
 .bib { position: relative; background: var(--code-bg); border-radius: 14px; margin-top: 8px; }
@@ -256,13 +290,6 @@ footer { margin-top: 88px; padding-block: 36px 48px; border-top: 1px solid var(-
     </nav>
   </div>
 </header>
-
-<div class="wide teaser">
-  <figure>
-    <div class="fig"><img src="static/images/teaser.png" alt="Three attack execution patterns: vanilla iterative attack computes every layer at every iteration; coarse-grained attack stops early at step S; fine-grained attack selectively recomputes or reuses each layer at each iteration." width="1800" height="777"></div>
-    <figcaption><b>Three ways to spend an attack budget.</b> (a) A vanilla iterative attack computes every layer at every step. (b) A coarse-grained attack stops early at step <i>S</i>. (c) Our fine-grained attack decides, per layer and per iteration, whether to recompute (orange) or reuse (green).</figcaption>
-  </figure>
-</div>
 
 <section id="tldr" class="col">
   <p class="lede">Cutting PGD iterations to fit a compute budget weakens the attack. <b>Spiking-PGD</b> <span class="f">recomputes</span> a layer only when its input has changed enough, <span class="r">reuses</span> the cached output otherwise, and keeps the gradient alive with a virtual surrogate gradient.</p>
@@ -322,44 +349,6 @@ footer { margin-top: 88px; padding-block: 36px 48px; border-top: 1px solid var(-
   </div>
 </section>
 
-<section id="explorer">
-  <div class="col">
-    <p class="kicker">Interactive</p>
-    <h2>Where does the budget go?</h2>
-    <div class="prose"><p>Each cell is one layer of ResNet-18 at one PGD iteration on CIFAR-10, holding the measured relative activation change \(\|a_t-a_{t-1}\|/\|a_t\|\) from Fig. 1 of the paper. Move the threshold to see which layers fire under the spiking gate, and how early stopping would spend the same number of layer computations.</p></div>
-  </div>
-  <div class="wide">
-    <div class="card explorer">
-      <div class="controls">
-        <div class="slider">
-          <label for="rho"><span>Spiking threshold ρ (×10⁻²)</span><output id="rhoOut" for="rho">1.50</output></label>
-          <input id="rho" type="range" min="0.2" max="4.2" step="0.05" value="1.5">
-        </div>
-        <div class="readout" aria-live="polite">
-          <div><span class="k">Layers computed</span><span class="v fire" id="cost">–</span></div>
-          <div><span class="k">Early stop at</span><span class="v" id="es">–</span></div>
-        </div>
-      </div>
-      <div class="grids">
-        <div class="gridbox">
-          <h4>Spiking-PGD <span>· fires where change ≥ ρ</span></h4>
-          <div class="scroll"><div class="mask" id="maskS" role="img" aria-label="Spiking mask"></div></div>
-        </div>
-        <div class="gridbox">
-          <h4>Early stopping <span>· same number of layer computations</span></h4>
-          <div class="scroll"><div class="mask" id="maskE" role="img" aria-label="Early stopping mask"></div></div>
-        </div>
-      </div>
-      <div class="legend">
-        <span><i style="background:var(--fire)"></i>recompute</span>
-        <span><i style="background:var(--reuse-soft)"></i>reuse / skip</span>
-        <span><i style="background:var(--fire);opacity:.5"></i>first iteration, always computed</span>
-      </div>
-      <p class="note">Spiking-PGD spreads computation across all ten iterations and spends it where activations still move, mostly the deep layers L14 to L18 in early steps. Early stopping spends the same amount on the first few iterations only. This is an illustration on measured statistics; in a real attack the activation changes also depend on which layers were reused.</p>
-    </div>
-  </div>
-</section>
-
 <section id="method">
   <div class="col">
     <p class="kicker">Method</p>
@@ -411,31 +400,75 @@ footer { margin-top: 88px; padding-block: 36px 48px; border-top: 1px solid var(-
   <div class="col">
     <p class="kicker">Results</p>
     <h2>Stronger at every budget</h2>
+    <div class="prose"><p>Accuracy under attack against the compute the attack is allowed to spend; lower means a stronger attack. Baselines spend their budget by running fewer iterations, Spiking-PGD by reusing layers. Drag across the chart to pick a budget.</p></div>
   </div>
   <div class="wide">
-    <div class="tabs" role="tablist" aria-label="Result figures">
-      <button class="tab" role="tab" id="t-vision" aria-controls="p-vision" aria-selected="true">Vision attacks</button>
-      <button class="tab" role="tab" id="t-graph" aria-controls="p-graph" aria-selected="false" tabindex="-1">Graph attacks</button>
-      <button class="tab" role="tab" id="t-at" aria-controls="p-at" aria-selected="false" tabindex="-1">Adversarial training</button>
-      <button class="tab" role="tab" id="t-abl" aria-controls="p-abl" aria-selected="false" tabindex="-1">Ablations</button>
+    <div class="card rs">
+      <div class="rs-top">
+        <div class="dsg"><span class="dsg-l">Vision · ResNet-18</span>
+          <div class="seg2" role="group" aria-label="Vision datasets">
+            <button type="button" data-rs="cifar10" aria-pressed="true">CIFAR-10</button><button type="button" data-rs="cifar100" aria-pressed="false">CIFAR-100</button><button type="button" data-rs="tiny" aria-pressed="false">Tiny-ImageNet</button>
+          </div></div>
+        <div class="dsg"><span class="dsg-l">Graph · GCN</span>
+          <div class="seg2" role="group" aria-label="Graph datasets">
+            <button type="button" data-rs="cora" aria-pressed="false">Cora</button><button type="button" data-rs="citeseer" aria-pressed="false">Citeseer</button>
+          </div></div>
+      </div>
+      <div class="rs-body">
+        <div class="rs-chart">
+          <div class="rs-leg" id="rsLeg"></div>
+          <svg id="rsSvg" viewBox="0 0 640 380" role="img" aria-label="Accuracy under attack versus computation cost"></svg>
+          <label class="rs-range" for="rsB"><span>Budget</span><input id="rsB" type="range" min="2" max="100" step="1" value="15"></label>
+        </div>
+        <div class="rs-side" aria-live="polite">
+          <div class="rs-at">At <b id="rsBud">15%</b> of full compute</div>
+          <div class="rs-hl"><span id="rsDelta">–</span><small id="rsDeltaL">accuracy points below the best baseline</small></div>
+          <div class="rs-rows" id="rsRows"></div>
+          <p class="rs-foot">Accuracy remaining under attack. A shorter bar is a stronger attack.</p>
+        </div>
+      </div>
     </div>
+    <p class="race-note">Curves are read off Figs. 5 and 6 of the paper (accurate to a few tenths of a point). A few high-budget baseline points hidden behind overlapping curves in the figures are left out.</p>
+  </div>
 
-    <figure class="panel" role="tabpanel" id="p-vision" aria-labelledby="t-vision">
-      <div class="fig"><img src="static/images/results_vision.png" alt="Accuracy under attack versus computation cost on CIFAR-10, CIFAR-100 and Tiny-ImageNet for I-FGSM, MI-FGSM, PGD and Spiking-PGD." width="1800" height="496"></div>
-      <figcaption><b>CIFAR-10, CIFAR-100, Tiny-ImageNet (ResNet-18).</b> Accuracy under attack against relative computation cost; lower means a stronger attack. Spiking-PGD is strongest at every budget, and the gap is largest when compute is scarce.</figcaption>
-    </figure>
-    <figure class="panel narrow" role="tabpanel" id="p-graph" aria-labelledby="t-graph" hidden>
-      <div class="fig"><img src="static/images/results_graph.png" alt="Accuracy under PGD and Spiking-PGD topology attacks versus computation cost on Cora and Citeseer." width="1400" height="579"></div>
-      <figcaption><b>Cora and Citeseer (GCN).</b> For topology attacks, PGD weakens quickly as compute drops while Spiking-PGD holds its strength, especially at small to moderate budgets.</figcaption>
-    </figure>
-    <figure class="panel" role="tabpanel" id="p-at" aria-labelledby="t-at" hidden>
-      <div class="fig"><img src="static/images/adv_training.png" alt="Clean and robust accuracy curves and precision curves for PGD-AT and Spiking-PGD adversarial training with different decay rates." width="1800" height="640"></div>
-      <figcaption><b>Adversarial training on CIFAR-10.</b> The threshold decays as \(\rho(t)=\rho_0\frac{e^{-\lambda t/N}-e^{-\lambda}}{1-e^{-\lambda}}\), so early epochs use cheap, weaker perturbations. With \(\lambda=2\), Spiking-PGD nearly matches PGD-AT in best clean and robust accuracy using under 30% of the computation.</figcaption>
-    </figure>
-    <figure class="panel" role="tabpanel" id="p-abl" aria-labelledby="t-abl" hidden>
-      <div class="fig"><img src="static/images/ablation.png" alt="Ablations on spiking threshold, virtual gradient and attack radius." width="1800" height="495"></div>
-      <figcaption><b>Ablations.</b> (a) Raising ρ cuts cost much faster than it weakens the attack. (b) The virtual surrogate gradient matters most at low cost. (c) Smaller radii ε degrade more gracefully.</figcaption>
-    </figure>
+  <div class="col at-intro">
+    <h3>Adversarial training at a fraction of the cost</h3>
+    <div class="prose"><p>For adversarial training the threshold follows a schedule, \(\rho(t)=\rho_0\frac{e^{-\lambda t/N}-e^{-\lambda}}{1-e^{-\lambda}}\) with \(\rho_0=0.1\) and \(N=200\) epochs. Early on, ρ is large and the attack reuses almost everything, so perturbations are cheap and weak. As ρ decays, more layers are recomputed and the attack sharpens. Play the 200 epochs on CIFAR-10.</p></div>
+  </div>
+  <div class="wide">
+    <div class="race-card at" id="atCard">
+      <div class="race-head">
+        <div class="race-iter" aria-live="polite"><b id="atE">Epoch 0</b>of 200</div>
+        <div class="race-ctrl">
+          <div class="seg" role="group" aria-label="Decay rate">
+            <button type="button" data-lam="1" aria-pressed="false">λ = 1</button><button type="button" data-lam="2" aria-pressed="true">λ = 2</button><button type="button" data-lam="3" aria-pressed="false">λ = 3</button>
+          </div>
+          <button class="rbtn" id="atPlay" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="atIcon" d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg><span>Pause</span></button>
+          <button class="rbtn" id="atRestart" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>Restart</button>
+        </div>
+      </div>
+      <div class="at-body">
+        <div class="at-charts">
+          <svg id="atAcc" viewBox="0 0 660 250" role="img" aria-label="Clean and robust accuracy during training"></svg>
+          <svg id="atCmp" viewBox="0 0 660 150" role="img" aria-label="Attack compute per epoch and threshold schedule"></svg>
+        </div>
+        <div class="at-side">
+          <div class="at-stat big"><span class="k">Attack compute so far</span><span class="v" id="atCum">–</span><span class="s">of what PGD-AT spends</span></div>
+          <div class="at-pair">
+            <div class="at-stat"><span class="k">Threshold <span style="text-transform:none">ρ</span></span><span class="v" id="atRho">–</span></div>
+            <div class="at-stat"><span class="k">This epoch</span><span class="v" id="atNow">–</span></div>
+          </div>
+          <div class="at-pair">
+            <div class="at-stat"><span class="k">Robust acc · ours</span><span class="v fire" id="atRo">–</span></div>
+            <div class="at-stat"><span class="k">Robust acc · PGD-AT</span><span class="v" id="atRv">–</span></div>
+          </div>
+          <div class="at-mask-l">Attack mask this epoch <small>(illustrative)</small></div>
+          <div class="at-mask" id="atMask" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="at-msg" id="atMsg" aria-live="polite"></div>
+    </div>
+    <p class="race-note">Accuracy and per-epoch attack compute are read off Figs. 7 and 8 of the paper; compute counts full-precision layer evaluations in the 10-step training attack. The mask shows a pattern with the same compute fraction, built from the Fig. 1 statistics.</p>
   </div>
 </section>
 
@@ -678,63 +711,195 @@ const T = D.length, L = D[0].length, TOTAL = T * L;
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { size(); draw(paused ? pauseAt : performance.now()); }, 120); });
 })();
 
-// ---- Explorer ----
-function build(el) {
-  const cells = [];
-  for (let t = 0; t < T; t++) {
-    const rl = document.createElement('div'); rl.className = 'rl'; rl.textContent = 'T' + (t + 1); el.appendChild(rl);
-    cells.push([]);
-    for (let l = 0; l < L; l++) {
-      const c = document.createElement('div'); c.className = 'cell';
-      c.title = `T${t + 1}, L${l + 1}: ${D[t][l].toFixed(2)}×10⁻²`;
-      el.appendChild(c); cells[t].push(c);
-    }
-  }
-  el.appendChild(document.createElement('div'));
-  for (let l = 0; l < L; l++) {
-    const cl = document.createElement('div'); cl.className = 'cl'; cl.textContent = (l % 3 === 0 || l === L - 1) ? 'L' + (l + 1) : ''; el.appendChild(cl);
-  }
-  return cells;
-}
-const S = build(document.getElementById('maskS'));
-const E = build(document.getElementById('maskE'));
-const rho = document.getElementById('rho');
-function render() {
-  const r = parseFloat(rho.value);
-  document.getElementById('rhoOut').textContent = r.toFixed(2);
-  let n = 0;
-  for (let t = 0; t < T; t++) for (let l = 0; l < L; l++) {
-    const first = t === 0, on = !first && D[t][l] >= r;
-    S[t][l].className = 'cell' + (first ? ' first' : on ? ' on' : '');
-    if (first || on) n++;
-  }
-  // Early stopping with the same number of layer computations: fill whole iterations in order.
-  for (let k = 0; k < TOTAL; k++) {
-    const t = Math.floor(k / L), l = k % L;
-    E[t][l].className = 'cell' + (k < n ? (t === 0 ? ' first' : ' on') : '');
-  }
-  document.getElementById('cost').textContent = Math.round(100 * n / TOTAL) + '%';
-  document.getElementById('es').textContent = 'T' + Math.max(1, Math.ceil(n / L));
-}
-rho.addEventListener('input', render);
-render();
+// ---- Results data (read off the paper's Figs. 5-8) ----
+const PD = {"res":{"cifar10":{"I-FGSM":[[5,74.18],[10,68.48],[15,62.25],[20,56.45],[25,50.75],[30,45.8],[35,43.73],[40,42.81],[45,42.26],[50,41.88],[55,41.55],[60,41.26]],"MI-FGSM":[[5,68.79],[10,57.35],[15,47.13],[20,44.94],[25,43.78],[30,43.01],[35,41.57],[50,41.43],[55,41.14],[60,40.9],[65,40.76],[70,40.51],[75,40.42],[80,40.34],[85,40.24],[90,40.24],[95,40.07],[100,40.04]],"PGD":[[5,71.61],[10,63.87],[15,57.3],[20,52.08],[25,47.89],[30,44.76],[35,42.74],[40,41.09],[45,40.59],[50,40.06],[55,39.68],[60,39.44],[65,39.22],[70,38.97],[75,38.48],[80,38.69],[85,38.6],[90,38.57],[95,38.43]],"Spiking-PGD":[[5.1,49.08],[9.1,47.18],[13.4,45.37],[19.8,43.62],[26.3,42.47],[32.8,41.91],[38.3,41.76],[42.3,41.47],[51.9,40.38],[75.1,39.29],[100.1,38.86]]},"cifar100":{"I-FGSM":[[5,41.21],[10,35.53],[15,30.99],[20,26.64],[25,22.96]],"MI-FGSM":[[5,35.72],[10,27.37],[15,20.89],[20,19.85],[25,19.54],[30,19.13],[40,18.59],[45,18.34],[50,18.16],[55,18.03],[60,17.85],[65,17.81],[70,17.71],[75,17.65],[80,17.62],[85,17.6],[90,17.57],[95,17.53],[100,17.52]],"PGD":[[5,38.35],[10,32.14],[15,27.14],[20,23.72],[25,21.38],[30,19.74],[35,19.01],[40,18.55],[45,17.45],[50,17.22],[55,17.06],[60,16.93],[65,16.88],[70,16.78],[75,16.71],[80,16.63],[85,16.58],[90,16.51],[95,16.46]],"Spiking-PGD":[[5.0,21.95],[10.3,20.69],[18.4,19.44],[24.7,18.85],[30.1,18.53],[35.3,18.36],[40.4,18.03],[52.2,17.47],[98.8,16.78]]},"tiny":{"I-FGSM":[[5,46.29],[10,43.39],[15,41.08],[20,39.57],[25,38.17],[30,37.25],[35,36.83],[40,36.72],[45,36.61],[50,36.51]],"MI-FGSM":[[5,43.55],[10,39.82],[15,37.44],[20,37.02],[25,36.85],[30,36.66],[35,36.31],[45,36.53],[50,36.45],[55,36.4],[60,36.36],[65,36.36],[70,36.32],[75,36.29],[80,36.29],[85,36.28],[90,36.26],[95,36.26],[100,36.24]],"PGD":[[5,44.89],[10,41.57],[15,39.78],[20,38.49],[25,37.53],[30,36.95],[35,36.63],[40,36.51],[45,36.02],[50,36.08],[55,36.02],[60,35.98],[65,35.97],[70,35.92],[75,35.88],[80,35.88],[85,35.86],[90,35.85],[95,35.85]],"Spiking-PGD":[[8.6,37.4],[15.9,36.85],[20.7,36.72],[25.6,36.59],[30.9,36.43],[37.2,36.42],[45.1,36.28],[73.3,36.04],[100.1,35.96]]},"cora":{"PGD":[[1.6,84.64],[10,81.22],[20,76.4],[30,73.46],[40,70.49],[50,68.89],[60,68.08],[70,67.78],[80,67.39],[90,66.96]],"Spiking-PGD":[[0.6,69.48],[37.5,67.25],[52.7,66.84],[63.6,66.61],[99.1,66.32]]},"citeseer":{"PGD":[[1.6,75.14],[10,70.7],[20,66.09],[30,62.12],[40,58.97],[50,57.36],[60,57.06],[70,55.82],[80,55.41],[90,54.7]],"Spiking-PGD":[[0.6,57.55],[36.8,55.25],[49.7,54.36],[67.7,54.1],[100.1,54.1]]}},"avg":{"1":[14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.1,14.2,14.2,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.2,14.2,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.5,14.6,14.6,14.8,15.0,14.8,15.7,15.6,16.0,16.4,16.4,17.4,17.3,17.9,18.4,18.4,19.5,19.6,20.8,20.8,21.4,22.0,22.5,23.0,23.1,23.4,23.8,24.0,24.2,24.2,24.3,24.4,24.4,24.5,24.5,24.4,24.6,24.7,25.0,25.2,24.9,25.0,25.1,25.1,25.1,25.2,25.3,25.3,25.4,25.2,25.5,25.8,26.0,26.1,26.2,26.4,26.6,26.6,26.8,27.0,26.7,27.6,27.5,27.7,28.0,28.1,28.4,28.7,28.6,29.6,29.6,30.1,30.6,30.5,31.5,31.7,32.7,32.6,33.1,33.6,33.6,34.7,34.6,35.1,35.5,35.5,36.5,36.6,37.0,37.4,37.4,38.3,38.4,38.8,39.2,39.1,40.1,40.1,40.5,40.8,40.8,41.8,41.7,42.1,42.5,42.6,42.9,43.3,43.6,44.0,44.1,44.4,44.7,44.7,45.6,45.5,45.5],"2":[14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.2,14.2,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.4,14.4,14.7,15.0,14.9,15.2,15.4,15.6,16.0,16.4,16.9,17.5,17.5,18.7,18.8,20.1,20.1,21.4,21.4,22.7,22.7,23.3,24.0,24.6,25.3,25.1,26.3,26.4,26.8,27.2,27.5,27.9,27.9,28.1,28.3,28.4,28.6,28.7,29.0,29.3,29.2,29.4,29.6,29.7,29.9,30.0,30.1,30.3,30.4,30.7,31.0,30.9,31.0,31.2,31.2,31.5,31.7,31.6,32.5,32.3,32.6,32.8,33.0,33.3,33.7,33.6,34.6,34.7,35.9,35.8,36.4,36.9,36.9,38.0,38.1,39.2,39.1,39.6,40.0,40.1,41.2,41.1,41.6,42.1,42.1,43.1,43.1,43.6,44.0,43.9,44.9,45.0,45.4,45.8,45.7,46.7,46.7,47.1,47.5,47.5,48.4,48.4,48.8,49.1,49.1,50.0,50.0,50.3,50.6,50.8,51.1,51.4,51.3,52.1,52.2,52.5,52.8,52.8,53.2,53.5,53.8,54.1,54.3,54.6,54.9,54.8,55.6,55.5,55.8,56.0,56.2,56.4,56.7,56.6,57.5,57.3,57.5,57.8,57.8],"3":[14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.4,14.6,14.9,15.3,15.3,15.8,16.2,16.1,17.5,17.5,18.9,18.9,20.3,20.4,21.8,21.8,23.3,23.3,24.7,25.3,26.0,26.0,27.0,27.1,27.5,27.9,28.2,28.5,28.5,28.8,29.0,29.1,29.3,29.6,29.4,30.2,30.1,30.3,30.6,30.6,30.9,31.1,31.0,32.0,31.9,32.2,32.6,32.7,33.1,33.5,33.9,34.4,34.5,35.5,35.4,35.9,36.4,36.4,37.6,37.6,38.9,38.9,40.1,40.0,40.6,41.2,41.2,42.4,42.5,43.6,43.5,44.1,44.6,44.6,45.6,45.8,46.8,46.8,47.2,47.7,47.7,48.8,48.7,49.2,49.7,49.7,50.6,50.6,51.1,51.5,51.4,52.4,52.4,52.8,53.2,53.2,54.2,54.1,54.4,54.8,54.9,55.3,55.6,56.0,56.3,56.5,56.8,57.1,56.9,57.9,57.9,58.2,58.5,58.6,58.9,59.2,59.5,59.9,59.9,60.2,60.5,60.4,60.8,61.1,61.4,61.6,61.7,62.0,62.2,62.3,62.5,62.8,63.1,63.4,63.4,63.6,63.9,64.0,64.2,64.4,64.8,65.1,65.0,65.2,65.4,65.5,65.7,65.9,65.8,66.1,66.4,66.4,66.4]},"inst":{"1":[14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.8,15.5,16.3,16.7,17.1,17.1,17.2,16.5,15.7,15.0,14.6,14.0,14.0,14.3,14.3,14.3,14.3,14.6,16.2,15.4,16.0,17.3,18.2,20.6,22.7,20.1,31.8,29.2,33.4,38.0,36.3,48.3,49.9,46.1,55.3,49.8,61.7,62.3,66.7,68.1,70.4,72.8,81.9,73.8,74.4,62.1,68.3,63.0,57.2,50.0,43.6,44.6,40.0,35.9,33.8,29.0,30.9,32.3,34.9,38.4,33.0,32.8,35.5,33.7,32.3,29.6,26.5,32.3,33.2,28.3,33.2,37.8,39.9,42.6,43.4,44.8,52.2,48.0,46.0,46.5,38.4,54.6,49.1,51.1,55.1,54.6,57.8,69.7,48.6,73.2,69.3,75.4,84.2,76.3,93.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"2":[14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.1,14.7,15.3,15.9,15.9,16.0,16.0,16.0,15.5,14.9,14.3,14.3,14.3,14.8,15.2,17.9,20.7,19.6,22.5,25.5,26.2,30.0,31.8,35.3,43.0,40.2,51.1,50.9,61.6,58.5,67.7,61.8,78.3,65.7,73.6,67.4,75.5,69.5,69.0,68.3,70.6,68.6,66.5,63.4,60.0,61.8,51.0,52.5,48.7,46.3,44.8,44.9,49.3,44.9,44.8,46.8,46.4,46.3,44.6,41.6,45.9,45.9,47.8,50.7,45.7,46.1,47.7,46.3,47.5,46.7,41.0,59.2,53.9,56.1,59.6,58.6,61.6,69.5,53.2,75.1,72.1,89.2,85.8,90.5,95.1,96.9,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"3":[14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,14.3,15.2,16.0,18.7,21.5,21.8,25.4,29.1,28.0,38.2,36.0,45.8,46.1,55.6,53.1,67.2,57.1,71.4,60.1,74.2,69.0,76.0,63.5,74.8,63.1,67.5,58.6,55.8,52.7,54.2,46.5,48.4,45.9,44.7,44.3,39.4,49.1,44.9,45.1,46.9,45.4,46.3,51.8,40.4,54.8,51.5,53.4,57.1,56.0,58.2,65.0,59.3,67.1,64.0,75.0,72.9,75.0,77.0,70.9,83.0,82.9,88.1,89.2,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0]},"acc":{"vanilla":{"clean":[38.6,44.4,38.6,44.4,46.6,49.9,53.0,53.3,53.9,54.5,56.2,59.3,61.0,62.3,62.4,62.7,62.9,63.0,64.5,66.0,67.0,67.1,67.1,67.2,67.4,67.6,68.4,68.4,69.3,69.3,69.6,69.6,69.6,69.6,69.9,70.0,70.1,70.1,70.8,70.8,70.8,70.8,70.9,71.7,71.7,71.7,71.7,71.8,71.8,71.8,71.8,71.9,71.9,71.9,72.0,72.3,72.7,72.7,72.7,72.7,72.7,72.7,73.4,74.0,74.0,73.9,73.9,73.9,74.0,74.0,73.9,73.7,73.4,73.4,73.4,73.4,73.4,73.4,73.4,73.7,74.4,74.9,74.9,74.4,73.7,74.1,74.4,74.4,74.4,74.5,74.5,74.5,74.7,75.3,75.3,75.3,75.6,75.6,75.9,76.4,76.5,79.0,79.4,79.7,79.8,79.8,80.0,79.8,79.8,79.8,79.8,79.8,79.7,79.7,79.7,79.7,79.7,79.7,79.7,79.7,79.7,79.6,79.6,79.5,79.5,79.5,79.5,79.5,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.3,79.1,79.1,79.1,79.1,79.1,79.4,79.8,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.9,79.8,79.8,79.8,79.7,79.7,79.7,79.7,79.7,79.8,79.8,79.8,79.8,79.8,79.8,79.8,79.7,79.7,79.6,79.6,79.6,79.6,79.6,79.6,79.6,79.6,79.6,79.6,79.5,79.5,79.5,79.5,79.5,79.5,79.4,79.4],"robust":[31.4,31.8,28.1,28.2,28.3,31.2,31.9,31.7,34.5,34.8,35.9,35.7,35.2,35.8,37.7,38.1,38.3,39.6,39.5,38.7,39.1,39.0,40.4,41.0,40.6,40.2,40.2,40.4,40.2,41.1,41.2,41.4,41.6,41.9,42.0,42.4,42.4,42.4,42.5,42.5,43.7,43.7,41.1,41.3,41.3,41.3,43.2,42.6,42.2,42.6,42.6,42.9,43.1,43.2,43.3,43.4,43.3,42.8,42.3,42.5,43.4,42.7,42.0,41.7,44.1,44.2,43.3,42.5,42.2,41.9,44.5,44.8,43.3,43.4,43.3,43.1,43.3,43.6,43.5,42.1,42.2,41.2,41.3,43.4,43.3,44.0,44.2,44.5,43.2,43.5,43.8,43.8,42.7,42.8,43.4,43.3,43.5,43.7,43.8,44.6,44.5,47.5,47.5,47.4,47.3,47.2,47.1,47.1,46.9,46.8,46.6,46.5,45.4,45.4,45.3,45.1,45.2,45.1,45.4,45.8,46.1,45.4,44.6,44.5,44.2,44.0,44.1,44.0,43.7,43.4,43.7,43.7,43.6,43.6,43.6,43.1,42.5,42.5,42.3,42.5,42.4,42.4,42.0,41.6,42.4,42.4,42.2,42.0,42.1,42.2,42.3,42.7,42.9,42.5,42.0,42.1,41.9,41.8,41.6,41.5,41.4,41.3,41.2,41.4,41.3,41.1,41.0,41.0,41.0,41.1,41.1,41.2,41.0,40.9,40.8,41.1,40.8,40.5,40.7,40.8,41.0,40.7,40.7,40.5,40.3,40.1,40.1,40.0,39.9,40.2,40.2,40.2,40.1,40.1,40.1,40.2,40.4,40.1,39.9,39.9,39.9]},"l1":{"clean":[39.0,40.6,41.8,42.9,46.5,48.8,49.7,50.5,54.5,56.3,58.2,61.0,61.3,62.2,64.2,64.6,64.6,64.6,64.6,66.0,66.0,66.7,67.9,68.4,68.5,69.1,70.1,70.1,70.1,70.1,70.1,72.0,72.3,72.4,72.4,74.4,75.2,76.0,76.0,76.0,76.0,76.0,77.7,79.2,79.2,79.2,79.2,79.2,79.2,78.8,76.2,76.2,77.3,78.1,77.3,75.6,75.6,71.3,71.2,71.2,71.2,71.2,76.5,78.5,78.5,78.5,76.5,75.8,74.0,74.0,74.0,74.0,77.3,77.4,78.3,78.3,78.3,78.3,77.5,74.9,73.4,73.2,73.4,73.4,73.4,73.4,76.7,76.9,79.1,79.5,79.8,79.9,80.1,80.1,80.1,80.1,80.6,80.6,80.6,80.6,83.2,84.7,84.7,84.7,84.7,84.6,84.5,84.5,84.5,84.5,84.4,84.4,84.3,84.2,84.1,84.0,84.0,83.9,83.6,83.5,83.4,83.4,83.4,83.3,83.3,83.2,83.2,83.0,82.9,82.9,82.8,82.6,82.7,82.7,82.7,82.7,82.7,82.7,82.7,82.6,82.5,82.5,82.3,82.1,82.1,82.0,82.0,82.0,82.0,82.1,82.3,82.4,82.6,82.7,82.7,82.7,82.7,82.7,82.7,82.7,82.6,82.7,82.7,82.6,82.6,82.6,82.6,82.6,82.6,82.5,82.5,82.5,82.4,82.4,82.4,82.4,82.4,82.4,82.4,82.4,82.4,82.4,82.5,82.5,82.5,82.4,82.4,82.4,82.4,82.4,82.3,82.3,82.3,82.3,82.3,82.3,82.3,82.3,82.3,82.3,82.3],"robust":[20.1,22.7,25.7,27.4,28.7,31.8,32.1,30.9,31.0,33.7,33.1,34.1,35.6,35.3,36.3,37.4,37.3,37.6,38.0,38.2,36.4,36.6,37.1,37.2,36.5,35.4,36.2,36.5,36.8,35.2,31.1,27.1,21.7,16.1,14.6,14.7,11.9,11.7,11.2,8.9,9.0,8.0,8.3,7.6,7.6,7.3,5.9,5.7,5.9,6.4,6.4,6.2,6.0,3.4,3.4,4.6,4.9,4.9,5.4,4.0,2.9,2.4,2.4,3.8,3.3,3.4,5.0,4.0,4.0,3.3,3.4,3.6,4.9,4.4,4.4,4.5,4.9,4.7,3.6,4.3,3.2,2.9,2.6,1.6,1.8,1.8,1.8,4.0,8.0,10.7,12.9,14.4,17.3,21.3,23.7,25.0,25.0,25.2,25.3,28.9,31.6,37.0,37.9,38.8,38.8,39.5,39.5,39.5,39.5,40.1,40.6,40.6,40.9,40.9,41.1,41.0,41.4,41.4,42.0,42.1,42.3,42.1,41.9,42.5,42.5,42.6,42.6,42.1,42.1,42.2,41.9,42.0,42.7,42.9,42.9,43.0,42.7,42.7,42.9,43.0,43.1,42.1,43.2,43.3,43.4,42.6,42.5,42.3,43.6,42.5,43.4,43.4,43.4,43.0,43.1,43.1,43.0,43.0,42.8,42.6,42.5,42.6,42.6,42.5,42.4,42.2,42.3,42.2,42.1,42.1,42.2,41.9,41.8,41.8,41.6,41.6,41.6,41.6,41.5,41.5,41.3,41.2,41.1,41.2,41.2,41.2,41.1,41.1,41.1,41.1,41.1,41.0,40.9,40.8,40.8,40.7,40.7,40.6,40.4,40.4,40.4]},"l2":{"clean":[34.9,38.2,39.7,41.1,45.9,49.5,50.9,52.8,53.7,55.2,57.2,58.5,59.9,61.3,62.2,63.0,64.8,64.9,65.0,65.7,66.5,67.2,67.9,68.8,69.0,70.1,70.2,70.4,70.4,70.4,70.4,71.2,71.2,71.4,71.1,71.4,71.8,71.8,71.8,71.8,71.9,72.5,74.1,75.0,75.0,75.0,75.0,75.0,75.0,75.0,75.5,75.5,75.6,76.5,77.0,77.0,77.0,78.8,78.8,78.8,75.0,72.2,69.4,69.4,69.4,69.4,69.6,71.8,72.3,80.5,80.8,80.8,80.8,80.8,79.9,79.5,79.0,77.9,77.7,77.7,77.7,77.7,77.7,77.8,77.8,77.8,77.8,77.7,77.6,77.4,77.1,76.9,76.6,76.5,76.5,76.6,76.8,76.8,77.1,77.8,80.8,81.2,81.2,81.3,81.4,81.4,81.4,81.5,81.5,81.5,81.5,81.5,81.5,81.4,81.4,81.4,81.4,81.3,81.3,81.3,81.3,81.2,81.2,81.2,81.2,81.2,81.2,81.2,81.2,80.9,80.9,80.9,80.8,80.8,80.9,80.9,80.9,80.8,80.8,80.7,80.7,80.6,80.6,80.6,80.6,80.6,80.6,80.6,80.8,81.0,81.5,81.5,81.5,81.5,81.5,81.5,81.5,81.5,81.6,81.6,81.6,81.5,81.5,81.5,81.5,81.5,81.5,81.5,81.5,81.4,81.4,81.4,81.3,81.3,81.3,81.2,81.2,81.2,81.2,81.2,81.2,81.2,81.2,81.3,81.3,81.3,81.3,81.3,81.2,81.2,81.2,81.2,81.2,81.2,81.2,81.2,81.2,81.1,81.2,81.1,81.1],"robust":[20.2,21.6,23.7,25.0,28.9,30.1,30.9,32.1,33.3,34.4,33.5,33.5,35.9,36.0,36.1,36.2,36.2,37.2,36.3,37.3,36.8,36.8,36.8,36.5,36.3,38.5,38.6,38.8,38.5,38.8,39.1,38.0,37.9,38.2,36.8,36.2,35.9,35.6,34.1,31.7,27.6,20.7,12.1,12.1,10.9,8.1,7.4,6.7,5.7,5.9,7.9,6.6,5.7,4.4,4.9,5.9,5.6,5.3,3.1,3.6,3.7,2.5,3.3,2.8,4.2,4.3,5.0,6.3,11.0,12.4,16.4,19.3,23.0,24.4,27.4,27.5,25.1,25.3,27.8,30.5,31.6,31.4,32.4,32.9,34.1,35.0,35.8,36.8,36.9,36.7,37.0,37.0,36.7,40.5,40.5,41.1,40.4,41.4,41.3,41.1,43.8,47.5,47.4,47.4,47.6,47.0,47.1,47.1,47.2,46.9,46.9,46.6,46.7,46.2,46.2,45.8,45.9,46.1,46.1,46.2,45.7,45.6,45.6,45.7,45.6,45.5,45.4,45.4,45.4,45.4,45.1,45.0,45.1,45.1,44.6,44.4,44.3,44.0,43.8,43.6,43.7,43.7,43.8,43.8,44.1,44.1,44.4,44.2,44.0,44.2,44.3,44.1,43.8,43.6,43.4,43.3,43.1,43.3,43.5,43.1,43.2,42.7,43.0,42.8,42.7,42.6,42.8,43.0,42.7,42.5,42.4,42.2,42.2,42.3,42.3,42.2,42.1,42.1,41.9,41.7,41.7,41.7,41.7,41.6,41.6,41.6,41.6,41.7,41.0,41.1,41.3,41.6,41.1,41.2,41.0,41.0,40.8,40.8,40.9,40.9,40.9]},"l3":{"clean":[40.6,42.3,43.7,45.1,48.0,50.9,52.3,53.2,55.1,57.3,58.9,60.4,62.1,63.2,63.9,65.2,65.5,66.8,67.2,67.8,68.0,68.8,70.2,71.4,71.4,71.4,71.6,72.2,72.2,72.2,71.3,71.1,71.1,71.1,71.1,72.4,73.9,74.0,74.9,76.3,76.3,76.3,77.4,77.4,77.4,75.5,75.2,74.6,75.2,75.2,74.7,74.7,75.9,77.0,77.0,77.1,77.8,77.9,78.0,77.9,78.0,78.0,77.8,78.0,77.8,77.6,77.6,77.1,77.0,77.0,76.3,76.3,77.0,76.4,76.4,76.3,76.0,75.6,75.6,75.4,75.2,74.9,74.9,75.4,75.4,75.4,75.4,75.4,75.4,75.2,75.2,75.2,75.1,75.1,75.1,75.2,75.2,75.5,75.5,76.6,78.4,80.0,80.1,80.1,80.1,80.5,80.5,80.6,80.6,80.8,80.8,80.8,80.8,80.7,80.6,80.6,80.6,80.4,80.4,80.4,80.4,80.4,80.4,80.4,80.5,80.5,80.5,80.5,80.5,80.4,80.4,80.2,80.2,80.2,80.3,80.4,80.4,80.3,80.3,80.0,80.0,80.0,80.0,80.0,80.0,80.0,80.0,80.1,80.1,80.5,80.5,80.9,80.9,80.9,80.9,80.9,80.9,80.9,80.9,80.9,80.8,80.8,80.7,80.7,80.7,80.7,80.7,80.7,80.7,80.7,80.7,80.5,80.5,80.5,80.5,80.5,80.5,80.6,80.6,80.5,80.5,80.6,80.6,80.6,80.6,80.6,80.6,80.6,80.6,80.6,80.6,80.6,80.6,80.5,80.5,80.5,80.5,80.4,80.4,80.4,80.4],"robust":[21.7,21.2,22.6,26.6,28.0,30.4,31.7,32.8,33.2,34.4,35.3,34.8,35.9,36.3,35.8,37.5,38.0,38.0,37.5,37.5,36.5,37.3,37.5,37.5,36.9,36.3,36.3,36.2,33.8,29.8,25.6,21.4,16.1,13.5,12.2,12.1,10.4,7.6,7.6,7.3,7.8,7.8,7.9,6.6,5.3,4.7,4.7,4.9,3.5,3.0,5.8,10.2,10.1,9.8,13.9,20.8,26.2,26.2,27.4,29.0,30.3,31.6,34.3,35.4,36.5,36.4,35.8,34.8,35.1,35.2,37.3,38.4,40.0,40.0,41.1,40.2,40.2,39.9,39.9,39.0,39.1,41.3,42.3,42.2,42.2,43.3,43.3,43.4,44.4,43.5,43.5,43.8,44.0,43.6,44.5,44.5,43.8,43.7,43.9,44.2,45.8,47.1,48.4,48.6,48.8,48.6,48.3,48.3,48.3,48.0,48.0,48.1,48.0,47.8,47.6,47.3,47.2,47.2,46.9,46.6,46.7,46.7,46.2,46.1,46.1,46.0,46.1,46.2,45.5,45.5,45.5,45.4,45.3,45.7,45.8,44.8,45.4,45.3,44.3,44.7,44.6,44.4,44.1,44.0,44.6,43.6,43.5,43.3,43.4,44.6,44.5,44.6,44.4,44.2,44.1,44.0,44.1,43.6,43.6,43.5,43.3,43.1,43.1,43.1,43.0,42.9,42.7,42.5,42.6,42.8,42.7,42.6,42.6,42.4,42.2,42.0,42.1,42.2,42.1,42.1,42.1,42.1,42.2,41.8,41.8,41.9,41.9,41.9,41.6,41.6,41.7,41.7,41.6,41.5,41.4,41.3,41.1,41.3,41.4,41.4,41.4]}}};
 
-// ---- Results tabs ----
-const tabs = [...document.querySelectorAll('.tab')];
-function select(tab) {
-  tabs.forEach(t => {
-    const on = t === tab;
-    t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
-    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
-  });
-}
-tabs.forEach((t, i) => {
-  t.addEventListener('click', () => select(t));
-  t.addEventListener('keydown', e => {
-    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-    if (d) { const n = tabs[(i + d + tabs.length) % tabs.length]; select(n); n.focus(); }
-  });
-});
+// ---- Results: accuracy under attack vs. budget ----
+(() => {
+  const svg = document.getElementById('rsSvg'), NS = 'http://www.w3.org/2000/svg';
+  const W = 640, H = 380, m = { l: 52, r: 18, t: 18, b: 46 };
+  const COLORS = { 'Spiking-PGD': 'var(--fire)', 'PGD': 'var(--c-pgd)', 'MI-FGSM': 'var(--c-mi)', 'I-FGSM': 'var(--c-i)' };
+  const ORDER = ['Spiking-PGD', 'PGD', 'MI-FGSM', 'I-FGSM'];
+  let ds = 'cifar10', budget = 15, lines = {}, yMin, yMax, layer;
+  const X = v => m.l + (W - m.l - m.r) * v / 100, Y = v => m.t + (H - m.t - m.b) * (1 - (v - yMin) / (yMax - yMin));
+  const el = (tag, a, p = svg) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+  const at = (pts, x) => {
+    if (!pts.length || x < pts[0][0] - .01 || x > pts[pts.length - 1][0] + .01) return null;
+    for (let i = 1; i < pts.length; i++) if (x <= pts[i][0]) { const [a, b] = [pts[i - 1], pts[i]]; return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0] || 1); }
+    return pts[pts.length - 1][1];
+  };
+  const smooth = pts => {                       // monotone-ish cubic through the points
+    if (pts.length < 3) return 'M' + pts.map(p => `${X(p[0])},${Y(p[1])}`).join('L');
+    let d = `M${X(pts[0][0])},${Y(pts[0][1])}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      const c1 = [X(p1[0]) + (X(p2[0]) - X(p0[0])) / 6, Y(p1[1]) + (Y(p2[1]) - Y(p0[1])) / 6];
+      const c2 = [X(p2[0]) - (X(p3[0]) - X(p1[0])) / 6, Y(p2[1]) - (Y(p3[1]) - Y(p1[1])) / 6];
+      d += `C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${X(p2[0])},${Y(p2[1])}`;
+    }
+    return d;
+  };
+  function build() {
+    svg.innerHTML = ''; lines = {};
+    const R = PD.res[ds], all = Object.values(R).flat().map(p => p[1]);
+    yMin = Math.floor(Math.min(...all) - 1); yMax = Math.ceil(Math.max(...all) + 1);
+    const step = (yMax - yMin) > 30 ? 10 : (yMax - yMin) > 12 ? 5 : 2;
+    for (let v = Math.ceil(yMin / step) * step; v <= yMax; v += step) {
+      el('line', { class: 'ax', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) });
+      el('text', { class: 'tk', x: m.l - 10, y: Y(v) + 4, 'text-anchor': 'end' }).textContent = v;
+    }
+    for (let v = 0; v <= 100; v += 20) el('text', { class: 'tk', x: X(v), y: H - m.b + 20, 'text-anchor': 'middle' }).textContent = v + '%';
+    el('text', { class: 'al', x: (W + m.l) / 2, y: H - 6, 'text-anchor': 'middle' }).textContent = 'Computation cost (relative to full attack)';
+    el('text', { class: 'al', x: 14, y: (H - m.b + m.t) / 2, 'text-anchor': 'middle', transform: `rotate(-90 14 ${(H - m.b + m.t) / 2})` }).textContent = 'Accuracy under attack (%)';
+    // advantage band between Spiking-PGD and PGD
+    const S = R['Spiking-PGD'], P = R['PGD'], lo = Math.max(S[0][0], P[0][0]), hi = Math.min(S[S.length - 1][0], P[P.length - 1][0]);
+    const xs = []; for (let x = lo; x <= hi; x += .5) xs.push(x);
+    el('path', { class: 'gap', d: 'M' + xs.map(x => `${X(x)},${Y(at(P, x))}`).join('L') + 'L' + xs.slice().reverse().map(x => `${X(x)},${Y(at(S, x))}`).join('L') + 'Z' });
+    for (const k of ORDER.slice().reverse()) if (R[k]) {
+      const path = el('path', { class: 'ln' + (k === 'Spiking-PGD' ? ' ours' : ''), d: smooth(R[k]), pathLength: 1, style: `stroke:${COLORS[k]}` });
+      path.style.strokeDasharray = 1; path.style.strokeDashoffset = 1;
+      requestAnimationFrame(() => requestAnimationFrame(() => { path.style.strokeDashoffset = 0; }));
+      lines[k] = R[k];
+    }
+    layer = el('g', {});
+    document.getElementById('rsLeg').innerHTML = ORDER.filter(k => R[k]).map(k => `<span class="${k === 'Spiking-PGD' ? 'ours' : ''}"><i style="background:${COLORS[k]}"></i>${k}</span>`).join('') + '<span><i class="gapk"></i>advantage over PGD</span>';
+    rows();
+    update();
+  }
+  function rows() {
+    const box = document.getElementById('rsRows'); box.innerHTML = '';
+    for (const k of ORDER) if (PD.res[ds][k]) box.insertAdjacentHTML('beforeend', `<div class="rs-row${k === 'Spiking-PGD' ? ' ours' : ''}" data-k="${k}"><span class="nm">${k}</span><span class="tr"><span class="br" style="background:${COLORS[k]}"></span></span><span class="vl">–</span></div>`);
+  }
+  function update() {
+    layer.innerHTML = '';
+    el('line', { class: 'cur', x1: X(budget), x2: X(budget), y1: m.t, y2: H - m.b }, layer);
+    el('text', { class: 'curl', x: X(budget) + (budget > 80 ? -6 : 6), y: m.t + 12, 'text-anchor': budget > 80 ? 'end' : 'start' }, layer).textContent = budget + '%';
+    const vals = {};
+    for (const k of ORDER) if (lines[k]) {
+      const v = at(lines[k], budget); vals[k] = v;
+      if (v != null) el('circle', { class: 'dot', cx: X(budget), cy: Y(v), r: k === 'Spiking-PGD' ? 7 : 5, style: `fill:${COLORS[k]}` }, layer);
+    }
+    document.getElementById('rsBud').textContent = budget + '%';
+    const base = ORDER.slice(1).map(k => vals[k]).filter(v => v != null);
+    const ours = vals['Spiking-PGD'];
+    const dEl = document.getElementById('rsDelta'), dL = document.getElementById('rsDeltaL');
+    if (ours != null && base.length) { const d = Math.min(...base) - ours; dEl.textContent = (d >= 0 ? '−' : '+') + Math.abs(d).toFixed(1); dL.textContent = d >= 0 ? 'accuracy points below the best baseline' : 'accuracy points above the best baseline'; }
+    else { dEl.textContent = '–'; dL.textContent = ours == null ? 'Spiking-PGD has no measurement at this budget' : 'no baseline measured at this budget'; }
+    const lo = yMin, hi = yMax;
+    document.querySelectorAll('.rs-row').forEach(r => {
+      const v = vals[r.dataset.k];
+      r.querySelector('.br').style.width = v == null ? '0%' : (8 + 92 * (v - lo) / (hi - lo)) + '%';
+      r.querySelector('.vl').textContent = v == null ? '–' : v.toFixed(1) + '%';
+    });
+  }
+  const range = document.getElementById('rsB');
+  range.addEventListener('input', () => { budget = +range.value; update(); });
+  function fromPointer(e) {
+    const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
+    budget = Math.max(2, Math.min(100, Math.round((x - m.l) / (W - m.l - m.r) * 100))); range.value = budget; update();
+  }
+  let drag = false;
+  svg.addEventListener('pointerdown', e => { drag = true; svg.setPointerCapture(e.pointerId); fromPointer(e); });
+  svg.addEventListener('pointermove', e => { if (drag || e.pointerType === 'mouse') fromPointer(e); });
+  svg.addEventListener('pointerup', () => { drag = false; });
+  document.querySelectorAll('[data-rs]').forEach(b => b.addEventListener('click', () => {
+    ds = b.dataset.rs; document.querySelectorAll('[data-rs]').forEach(x => x.setAttribute('aria-pressed', x === b)); build();
+  }));
+  build();
+})();
+
+// ---- Results: adversarial training animation ----
+(() => {
+  const $ = id => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const N = 200, RHO0 = 0.1, MS = 70, HOLD = 3500;
+  let lam = '2', e = 0, t0 = performance.now(), paused = false, pauseAt = 0, raf = 0, visible = false;
+  const rhoAt = (t, l) => RHO0 * (Math.exp(-l * t / N) - Math.exp(-l)) / (1 - Math.exp(-l));
+  const el = (svg, tag, a) => { const x = document.createElementNS(NS, tag); for (const k in a) x.setAttribute(k, a[k]); svg.appendChild(x); return x; };
+  const acc = $('atAcc'), cmp = $('atCmp');
+  const A = { W: 660, H: 262, l: 44, r: 56, t: 28, b: 30 }, C = { W: 660, H: 170, l: 44, r: 56, t: 30, b: 30 };
+  const ax = (o, ep) => o.l + (o.W - o.l - o.r) * ep / N;
+  const ay = (o, v, max = 100) => o.t + (o.H - o.t - o.b) * (1 - v / max);
+  function frame(svg, o, ylab, ticks) {
+    svg.innerHTML = '';
+    for (const v of ticks) { el(svg, 'line', { class: 'ax', x1: o.l, x2: o.W - o.r, y1: ay(o, v), y2: ay(o, v) }); el(svg, 'text', { class: 'tk', x: o.l - 8, y: ay(o, v) + 4, 'text-anchor': 'end' }).textContent = v; }
+    for (let v = 0; v <= N; v += 50) el(svg, 'text', { class: 'tk', x: ax(o, v), y: o.H - o.b + 18, 'text-anchor': 'middle' }).textContent = v;
+    el(svg, 'text', { class: 'al', x: 0, y: 12, 'text-anchor': 'start' }).textContent = ylab;
+  }
+  let P = {};
+  function setup() {
+    frame(acc, A, 'Accuracy (%)  ·  solid: clean, dotted: robust', [0, 20, 40, 60, 80]);
+    frame(cmp, C, 'Attack compute per epoch (%)', [0, 50, 100]);
+    el(cmp, 'line', { x1: C.l, x2: C.W - C.r, y1: ay(C, 100), y2: ay(C, 100), stroke: 'rgba(242,244,248,.55)', 'stroke-dasharray': '4 4' });
+    el(cmp, 'text', { class: 'tk', x: C.W - C.r + 6, y: ay(C, 100) + 4, 'text-anchor': 'start' }).textContent = 'PGD-AT';
+    P.area = el(cmp, 'path', { fill: 'rgba(240,122,74,.55)' });
+    P.rho = el(cmp, 'path', { fill: 'none', stroke: '#82b2ff', 'stroke-width': 2, 'stroke-dasharray': '5 4' });
+    P.rhoL = el(cmp, 'text', { class: 'tk', fill: '#82b2ff', style: 'fill:#82b2ff' });
+    P.vc = el(acc, 'path', { fill: 'none', stroke: 'rgba(242,244,248,.6)', 'stroke-width': 2 });
+    P.vr = el(acc, 'path', { fill: 'none', stroke: 'rgba(242,244,248,.6)', 'stroke-width': 2, 'stroke-dasharray': '2 4', 'stroke-linecap': 'round' });
+    P.sc = el(acc, 'path', { fill: 'none', stroke: '#f07a4a', 'stroke-width': 2.4 });
+    P.sr = el(acc, 'path', { fill: 'none', stroke: '#ff9466', 'stroke-width': 2.6, 'stroke-dasharray': '2 4', 'stroke-linecap': 'round' });
+    P.lv = el(acc, 'text', { class: 'tk', style: 'fill:rgba(242,244,248,.75)' }); P.ls = el(acc, 'text', { class: 'tk', style: 'fill:#ff9466' });
+    P.head = [el(acc, 'line', { stroke: 'rgba(255,255,255,.35)' }), el(cmp, 'line', { stroke: 'rgba(255,255,255,.35)' })];
+    P.best = el(acc, 'g', {});
+    const mask = $('atMask'); mask.innerHTML = '';
+    P.cells = Array.from({ length: T * L }, () => { const i = document.createElement('i'); mask.appendChild(i); return i; });
+    // cells ranked by measured change (Fig. 1); the first iteration is always computed
+    P.rank = [...Array(T * L).keys()].filter(k => k >= L).sort((a, b) => D[Math.floor(b / L)][b % L] - D[Math.floor(a / L)][a % L]);
+  }
+  const pathOf = (arr, n, o, f = v => v) => 'M' + arr.slice(0, n + 1).map((v, i) => `${ax(o, i)},${ay(o, f(v))}`).join('L');
+  function render(ep) {
+    const k = lam, inst = PD.inst[k], av = PD.avg[k], S = PD.acc['l' + k], V = PD.acc.vanilla;
+    P.vc.setAttribute('d', pathOf(V.clean, ep, A)); P.vr.setAttribute('d', pathOf(V.robust, ep, A));
+    P.sc.setAttribute('d', pathOf(S.clean, ep, A)); P.sr.setAttribute('d', pathOf(S.robust, ep, A));
+    P.lv.setAttribute('x', ax(A, ep) + 6); P.lv.setAttribute('y', ay(A, V.robust[ep]) - 6); P.lv.textContent = 'PGD-AT';
+    P.ls.setAttribute('x', ax(A, ep) + 6); P.ls.setAttribute('y', ay(A, S.robust[ep]) + 14); P.ls.textContent = 'Spiking';
+    P.area.setAttribute('d', pathOf(inst, ep, C) + `L${ax(C, ep)},${ay(C, 0)}L${ax(C, 0)},${ay(C, 0)}Z`);
+    const rr = [...Array(ep + 1).keys()].map(t => rhoAt(t, +k));
+    P.rho.setAttribute('d', pathOf(rr, ep, C, v => 100 * v / RHO0));
+    P.rhoL.setAttribute('x', ax(C, ep) + 6); P.rhoL.setAttribute('y', ay(C, 100 * rr[ep] / RHO0) + 4); P.rhoL.textContent = 'ρ(t)';
+    for (const [h, o] of [[P.head[0], A], [P.head[1], C]]) { h.setAttribute('x1', ax(o, ep)); h.setAttribute('x2', ax(o, ep)); h.setAttribute('y1', o.t); h.setAttribute('y2', o.H - o.b); }
+    $('atE').textContent = 'Epoch ' + ep;
+    $('atCum').textContent = Math.round(av[ep]) + '%';
+    $('atRho').textContent = rr[ep].toFixed(3);
+    $('atNow').textContent = Math.round(inst[ep]) + '%';
+    $('atRo').textContent = S.robust[ep].toFixed(1) + '%'; $('atRv').textContent = V.robust[ep].toFixed(1) + '%';
+    // mask with the same compute fraction
+    const n = Math.round(inst[ep] / 100 * T * L), on = new Set([...Array(L).keys(), ...P.rank.slice(0, Math.max(0, n - L))]);
+    P.cells.forEach((c, i) => c.classList.toggle('on', on.has(i)));
+    // best robust epoch marker and message
+    const bestE = S.robust.indexOf(Math.max(...S.robust));
+    P.best.innerHTML = '';
+    if (ep >= bestE) {
+      el(P.best, 'circle', { cx: ax(A, bestE), cy: ay(A, S.robust[bestE]), r: 6, fill: '#ff9466', stroke: '#0e1420', 'stroke-width': 2 });
+      el(P.best, 'text', { class: 'tk', x: ax(A, bestE), y: ay(A, S.robust[bestE]) - 12, 'text-anchor': 'middle', style: 'fill:#ff9466' }).textContent = `best robust · epoch ${bestE}`;
+    }
+    const msg = ep < 25 ? 'Large ρ: the attack reuses almost every layer, so training starts with cheap, weak perturbations.'
+      : ep < bestE - 30 ? 'Weak perturbations let robust accuracy dip. As ρ decays, more layers fire and the attack sharpens.'
+      : ep < bestE ? 'More full-precision computation returns; robust accuracy recovers toward PGD-AT.'
+      : `Best robust accuracy <b>${S.robust[bestE].toFixed(1)}%</b> (PGD-AT best: <b>${Math.max(...V.robust).toFixed(1)}%</b>) reached at epoch ${bestE} with <b>${Math.round(av[bestE])}%</b> of PGD-AT's attack compute.`;
+    $('atMsg').innerHTML = msg;
+  }
+  function loop(now) {
+    if (!paused) { const c = (N + 1) * MS + HOLD, x = (now - t0) % c; e = Math.min(N, Math.floor(x / MS)); render(e); }
+    raf = visible && !paused ? requestAnimationFrame(loop) : 0;
+  }
+  const start = () => { if (!raf && !paused) raf = requestAnimationFrame(loop); };
+  function setPaused(p) {
+    paused = p; $('atPlay').querySelector('span').textContent = p ? 'Play' : 'Pause';
+    $('atIcon').setAttribute('d', p ? 'M7 4l13 8-13 8z' : 'M6 4h4v16H6zM14 4h4v16h-4z');
+    if (p) { pauseAt = performance.now(); cancelAnimationFrame(raf); raf = 0; } else { t0 += performance.now() - pauseAt; start(); }
+  }
+  $('atPlay').addEventListener('click', () => setPaused(!paused));
+  $('atRestart').addEventListener('click', () => { t0 = performance.now(); pauseAt = t0; if (paused) setPaused(false); else start(); });
+  document.querySelectorAll('[data-lam]').forEach(b => b.addEventListener('click', () => {
+    lam = b.dataset.lam; document.querySelectorAll('[data-lam]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    if (paused || still) render(e); else { t0 = performance.now(); }
+  }));
+  setup(); render(N); e = N;                       // complete at rest: the finished run
+  if (still) { paused = true; $('atPlay').querySelector('span').textContent = 'Play'; $('atIcon').setAttribute('d', 'M7 4l13 8-13 8z'); return; }
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible) { if (!raf && e === N && !paused) t0 = performance.now(); start(); } }, { threshold: .25 }).observe($('atCard'));
+})();
 
 // ---- BibTeX copy ----
 document.getElementById('copyBib').addEventListener('click', async (e) => {
